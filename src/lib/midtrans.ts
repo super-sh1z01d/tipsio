@@ -1,6 +1,13 @@
-import { decrypt } from "./encryption";
+import { decrypt, encrypt } from "./encryption";
 
 const MIDTRANS_SANDBOX_URL = "https://app.sandbox.midtrans.com/snap/v1/transactions";
+
+/**
+ * Encrypt a Midtrans key for secure storage
+ */
+export function encryptKey(key: string): string {
+  return encrypt(key);
+}
 const MIDTRANS_PRODUCTION_URL = "https://app.midtrans.com/snap/v1/transactions";
 
 interface MidtransCredentials {
