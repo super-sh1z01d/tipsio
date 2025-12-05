@@ -37,7 +37,6 @@ const staffSchema = z.object({
   fullName: z.string().optional(),
   role: z.enum(["WAITER", "BARTENDER", "BARISTA", "HOSTESS", "CHEF", "ADMINISTRATOR", "OTHER"]),
   avatarUrl: z.string().optional(),
-  participatesInPool: z.boolean(),
 });
 
 type StaffForm = z.infer<typeof staffSchema>;
@@ -48,12 +47,13 @@ type Staff = {
   fullName?: string;
   role: string;
   status: string;
-  participatesInPool: boolean;
   avatarUrl?: string | null;
   balance?: number;
+  totalTips?: number;
   qrCode?: { id: string; shortCode: string; status: string };
   user?: { email?: string; phone?: string };
   _count?: { tips: number };
+  createdAt?: string;
 };
 
 // Avatar component with fallback
@@ -109,7 +109,6 @@ export default function StaffManagementPage() {
       fullName: "",
       role: "WAITER",
       avatarUrl: "",
-      participatesInPool: true,
     },
   });
 
@@ -304,18 +303,6 @@ export default function StaffManagementPage() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="participatesInPool"
-                  {...form.register("participatesInPool")}
-                  className="h-4 w-4"
-                />
-                <Label htmlFor="participatesInPool" className="text-sm">
-                  {t('participatesInPool')}
-                </Label>
-              </div>
-
               <Button
                 type="submit"
                 disabled={isLoading}
@@ -394,13 +381,11 @@ export default function StaffManagementPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="flex gap-4 text-sm text-muted-foreground">
-                  {member.participatesInPool && <span>🎱 {t('inPool')}</span>}
-                  {member._count?.tips !== undefined && (
-                    <span>💰 {member._count.tips} {t('tipsCount')}</span>
-                  )}
-                  {member.balance !== undefined && member.balance > 0 && (
-                    <span className="text-primary">💵 {t('balance')}: Rp {member.balance.toLocaleString()}</span>
+                <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                  <span>💰 {member._count?.tips || 0} {t('tipsCount')}</span>
+                  <span>📊 {t('totalEarned')}: Rp {(member.totalTips || 0).toLocaleString()}</span>
+                  {(member.balance || 0) > 0 && (
+                    <span className="text-primary font-medium">💵 {t('balance')}: Rp {member.balance?.toLocaleString()}</span>
                   )}
                 </div>
               </CardContent>

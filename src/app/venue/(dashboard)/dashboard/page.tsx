@@ -265,39 +265,70 @@ export default function VenueDashboardPage() {
           )}
         </Card>
       ) : (
-        /* Top Staff for PERSONAL mode */
-        <Card className="glass p-4">
-          <h2 className="font-semibold mb-4">{t('topPerformers')}</h2>
-          {data.topStaff.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              {t('noTipsYet')}
-            </p>
-          ) : (
-            <div className="space-y-3">
-              {data.topStaff.map((staff, index) => (
-                <div
-                  key={staff.id}
-                  className="flex items-center gap-3 p-3 bg-white/5 rounded-xl"
-                >
-                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold">
-                    {index + 1}
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-medium">{staff.displayName}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {staff.tipsCount} {t('tips')}
+        /* Top Staff + Tip History for PERSONAL mode */
+        <>
+          <Card className="glass p-4">
+            <h2 className="font-semibold mb-4">{t('topPerformers')}</h2>
+            {data.topStaff.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                {t('noTipsYet')}
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {data.topStaff.map((staff, index) => (
+                  <div
+                    key={staff.id}
+                    className="flex items-center gap-3 p-3 bg-white/5 rounded-xl"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold">
+                      {index + 1}
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-medium">{staff.displayName}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {staff.tipsCount} {t('tips')}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-semibold text-primary">
+                        {formatCurrency(staff.totalTips)}
+                      </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="font-semibold text-primary">
-                      {formatCurrency(staff.totalTips)}
-                    </div>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
+            )}
+          </Card>
+
+          {/* Tip History for PERSONAL mode */}
+          <Card className="glass p-4">
+            <div className="flex items-center gap-2 mb-4">
+              <History className="h-5 w-5 text-primary" />
+              <h2 className="font-semibold">{t('tipHistory')}</h2>
             </div>
-          )}
-        </Card>
+            {data.recentTips && data.recentTips.length > 0 ? (
+              <div className="space-y-3">
+                {data.recentTips.map((tip) => (
+                  <div
+                    key={tip.id}
+                    className="flex items-center justify-between p-3 bg-white/5 rounded-xl"
+                  >
+                    <div className="text-sm text-muted-foreground">
+                      {formatDate(tip.createdAt)}
+                    </div>
+                    <div className="font-semibold text-primary">
+                      {formatCurrency(tip.amount)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                {t('noTipsYet')}
+              </p>
+            )}
+          </Card>
+        </>
       )}
     </div>
   );

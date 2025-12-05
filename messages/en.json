@@ -362,9 +362,10 @@
       "activate": "Activate",
       "deactivate": "Deactivate",
       "deleteConfirm": "Delete staff member {name}?",
-      "inPool": "In pool",
       "tipsCount": "tips",
+      "totalEarned": "Total earned",
       "balance": "Balance",
+      "noTipsYet": "No tips yet",
       "roles": {
         "waiter": "Waiter",
         "bartender": "Bartender",

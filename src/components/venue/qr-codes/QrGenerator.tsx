@@ -13,7 +13,6 @@ import { PDFDownloadLink } from "@react-pdf/renderer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import {
   Select,
@@ -23,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import QRCode from "qrcode";
-import { Download, Upload, Palette, FileText } from "lucide-react";
+import { Download, Upload } from "lucide-react";
 
 interface QrGeneratorProps {
   shortCode: string;
@@ -90,29 +89,25 @@ export function QrGenerator({ shortCode, venueName }: QrGeneratorProps) {
   if (!isClient) return null;
 
   return (
-    <div className="space-y-4">
-      {/* Preview Card */}
-      <Card className="glass overflow-hidden">
-        <CardContent className="p-4">
-          <div className="bg-muted/30 rounded-lg p-4 flex items-center justify-center min-h-[280px]">
-            <div className="w-full max-w-[240px] shadow-lg rounded-lg overflow-hidden">
-              <MaterialPreview
-                design={design}
-                qrDataUrl={qrDataUrl}
-                venueName={venueName}
-              />
-            </div>
+    <div className="flex flex-col lg:flex-row gap-6 p-4 md:p-0">
+      {/* Left: Preview */}
+      <div className="lg:w-1/2">
+        <div className="bg-muted/30 rounded-xl p-6 flex items-center justify-center min-h-[300px] lg:min-h-[400px] lg:sticky lg:top-6">
+          <div className="w-full max-w-[220px] shadow-xl rounded-lg overflow-hidden">
+            <MaterialPreview
+              design={design}
+              qrDataUrl={qrDataUrl}
+              venueName={venueName}
+            />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* Format Selection */}
-      <Card className="glass">
-        <CardContent className="p-4 space-y-3">
-          <Label className="text-sm font-medium flex items-center gap-2">
-            <FileText className="w-4 h-4" />
-            Формат
-          </Label>
+      {/* Right: Settings */}
+      <div className="lg:w-1/2 space-y-6">
+        {/* Format Selection */}
+        <div className="space-y-3">
+          <Label className="text-sm font-heading font-semibold">Формат материала</Label>
           <div className="grid grid-cols-2 gap-2">
             {MATERIAL_TYPES.map((type) => (
               <button
@@ -123,10 +118,10 @@ export function QrGenerator({ shortCode, venueName }: QrGeneratorProps) {
                     materialType: type.id as MaterialType,
                   }))
                 }
-                className={`p-3 rounded-lg border text-left transition-all ${
+                className={`p-3 rounded-xl border text-left transition-all ${
                   design.materialType === type.id
                     ? "border-primary bg-primary/10"
-                    : "border-border bg-background hover:border-primary/50"
+                    : "border-white/10 bg-white/5 hover:bg-white/10"
                 }`}
               >
                 <div className="font-medium text-sm">{type.label.ru}</div>
@@ -136,19 +131,16 @@ export function QrGenerator({ shortCode, venueName }: QrGeneratorProps) {
               </button>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Content Settings */}
-      <Card className="glass">
-        <CardContent className="p-4 space-y-4">
-          <Label className="text-sm font-medium">Текст</Label>
-
+        {/* Text Settings */}
+        <div className="space-y-3">
+          <Label className="text-sm font-heading font-semibold">Текст призыва</Label>
           <Select
             value={design.ctaText}
             onValueChange={(v) => setDesign((d) => ({ ...d, ctaText: v }))}
           >
-            <SelectTrigger>
+            <SelectTrigger className="h-12">
               <SelectValue placeholder="Выберите текст" />
             </SelectTrigger>
             <SelectContent>
@@ -159,16 +151,19 @@ export function QrGenerator({ shortCode, venueName }: QrGeneratorProps) {
               ))}
             </SelectContent>
           </Select>
-
           <Input
-            placeholder="Или свой вариант..."
+            placeholder="Или введите свой вариант..."
             value={design.ctaText}
             onChange={(e) => setDesign((d) => ({ ...d, ctaText: e.target.value }))}
+            className="h-12"
           />
+        </div>
 
-          <div className="flex items-center justify-between pt-2">
-            <Label htmlFor="logo-switch" className="text-sm cursor-pointer">
-              Логотип
+        {/* Logo Settings */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="logo-switch" className="text-sm font-heading font-semibold cursor-pointer">
+              Логотип заведения
             </Label>
             <Switch
               id="logo-switch"
@@ -176,11 +171,10 @@ export function QrGenerator({ shortCode, venueName }: QrGeneratorProps) {
               onCheckedChange={(c) => setDesign((d) => ({ ...d, showLogo: c }))}
             />
           </div>
-
           {design.showLogo && (
-            <Button variant="outline" className="w-full relative overflow-hidden">
+            <Button variant="outline" className="w-full h-12 relative overflow-hidden">
               <Upload className="w-4 h-4 mr-2" />
-              {design.logoUrl ? "Изменить" : "Загрузить"}
+              {design.logoUrl ? "Изменить логотип" : "Загрузить логотип"}
               <input
                 type="file"
                 accept="image/*"
@@ -189,25 +183,19 @@ export function QrGenerator({ shortCode, venueName }: QrGeneratorProps) {
               />
             </Button>
           )}
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Color Settings */}
-      <Card className="glass">
-        <CardContent className="p-4 space-y-4">
-          <Label className="text-sm font-medium flex items-center gap-2">
-            <Palette className="w-4 h-4" />
-            Цвет
-          </Label>
-
-          <div className="flex flex-wrap gap-2">
+        {/* Color Settings */}
+        <div className="space-y-3">
+          <Label className="text-sm font-heading font-semibold">Цвет фона</Label>
+          <div className="flex flex-wrap gap-3">
             {PRESET_COLORS.map((c, i) => (
               <button
                 key={i}
-                className={`w-10 h-10 rounded-lg border-2 transition-all ${
+                className={`w-11 h-11 rounded-xl border-2 transition-all ${
                   design.baseColor === c.base
-                    ? "border-primary ring-2 ring-primary/30"
-                    : "border-border"
+                    ? "border-primary ring-2 ring-primary/30 scale-110"
+                    : "border-white/20 hover:scale-105"
                 }`}
                 style={{ backgroundColor: c.base }}
                 onClick={() =>
@@ -220,7 +208,7 @@ export function QrGenerator({ shortCode, venueName }: QrGeneratorProps) {
                 title={c.name}
               />
             ))}
-            <div className="relative w-10 h-10">
+            <div className="relative w-11 h-11">
               <input
                 type="color"
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
@@ -229,48 +217,48 @@ export function QrGenerator({ shortCode, venueName }: QrGeneratorProps) {
                   setDesign((d) => ({ ...d, baseColor: e.target.value }))
                 }
               />
-              <div className="w-full h-full rounded-lg border-2 border-border bg-gradient-to-br from-red-500 via-green-500 to-blue-500" />
+              <div className="w-full h-full rounded-xl border-2 border-white/20 bg-gradient-to-br from-red-500 via-green-500 to-blue-500" />
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Download Button */}
-      <div className="sticky bottom-4 z-10">
-        {isClient && qrDataUrl ? (
-          <PDFDownloadLink
-            document={
-              <QrPdfDocument
-                design={design}
-                qrDataUrl={qrDataUrl}
-                venueName={venueName}
-              />
-            }
-            fileName={`tipsio-${design.materialType}.pdf`}
-            className="block"
-          >
-            {({ loading }) => (
-              <Button
-                className="w-full h-12 text-base font-semibold shadow-lg"
-                size="lg"
-                disabled={loading}
-              >
-                {loading ? (
-                  "Генерация..."
-                ) : (
-                  <>
-                    <Download className="w-5 h-5 mr-2" />
-                    Скачать PDF
-                  </>
-                )}
-              </Button>
-            )}
-          </PDFDownloadLink>
-        ) : (
-          <Button className="w-full h-12" size="lg" disabled>
-            Загрузка...
-          </Button>
-        )}
+        {/* Download Button */}
+        <div className="pt-4">
+          {isClient && qrDataUrl ? (
+            <PDFDownloadLink
+              document={
+                <QrPdfDocument
+                  design={design}
+                  qrDataUrl={qrDataUrl}
+                  venueName={venueName}
+                />
+              }
+              fileName={`tipsio-${design.materialType}.pdf`}
+              className="block"
+            >
+              {({ loading }) => (
+                <Button
+                  className="w-full h-14 text-lg font-heading font-bold bg-gradient-to-r from-cyan-500 to-blue-600"
+                  size="lg"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    "Генерация..."
+                  ) : (
+                    <>
+                      <Download className="w-5 h-5 mr-2" />
+                      Скачать PDF
+                    </>
+                  )}
+                </Button>
+              )}
+            </PDFDownloadLink>
+          ) : (
+            <Button className="w-full h-14" size="lg" disabled>
+              Загрузка...
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );

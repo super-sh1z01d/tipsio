@@ -369,9 +369,10 @@
       "activate": "Активировать",
       "deactivate": "Деактивировать",
       "deleteConfirm": "Удалить сотрудника {name}?",
-      "inPool": "В пуле",
       "tipsCount": "чаевых",
+      "totalEarned": "Всего заработано",
       "balance": "Баланс",
+      "noTipsYet": "Чаевых пока нет",
       "roles": {
         "waiter": "Официант",
         "bartender": "Бармен",

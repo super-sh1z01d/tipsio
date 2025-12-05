@@ -115,6 +115,16 @@ export async function GET(request: NextRequest) {
         where: { venueId: venue.id, status: "PENDING" },
       });
 
+      // Get recent tips for history display
+      const recentTips = tips
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, 10)
+        .map((tip) => ({
+          id: tip.id,
+          amount: tip.netAmount,
+          createdAt: tip.createdAt.toISOString(),
+        }));
+
       return NextResponse.json({
         venue: { id: venue.id, name: venue.name, distributionMode: venue.distributionMode },
         metrics: {
@@ -125,6 +135,7 @@ export async function GET(request: NextRequest) {
         },
         topStaff,
         hasPendingPayouts: pendingPayouts > 0,
+        recentTips,
       });
     } catch {
       // Database not available, return mock data

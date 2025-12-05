@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const staff = await prisma.staff.findMany({
+    const staffList = await prisma.staff.findMany({
       where: { venueId },
       include: {
         qrCode: {
@@ -75,8 +75,46 @@ export async function GET(request: NextRequest) {
             tips: true,
           },
         },
+        tips: {
+          where: {
+            status: "PAID",
+          },
+          select: {
+            amount: true,
+          },
+        },
+        allocations: {
+          select: {
+            amount: true,
+            payoutId: true,
+          },
+        },
       },
       orderBy: { createdAt: "desc" },
+    });
+
+    // Calculate totalTips and balance for each staff member
+    const staff = staffList.map((s) => {
+      // Total from direct tips (PERSONAL mode) - only PAID tips
+      const totalFromTips = s.tips.reduce((sum, tip) => sum + tip.amount, 0);
+      // Total from allocations (POOLED mode)
+      const totalFromAllocations = s.allocations.reduce((sum, a) => sum + a.amount, 0);
+      const totalTips = totalFromTips + totalFromAllocations;
+      
+      // Paid out = allocations that have payoutId (already paid to staff)
+      const paidOutFromAllocations = s.allocations.filter((a) => a.payoutId).reduce((sum, a) => sum + a.amount, 0);
+      
+      // Balance = total earned minus paid out
+      // For direct tips, we assume they're not paid out yet unless there's an allocation
+      const balance = totalTips - paidOutFromAllocations;
+      
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { tips, allocations, ...staffData } = s;
+      return {
+        ...staffData,
+        totalTips,
+        balance,
+      };
     });
 
     return NextResponse.json({ staff });
