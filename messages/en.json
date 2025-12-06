@@ -16,7 +16,7 @@
     "heroNew": {
       "headline": "Tips that",
       "highlight": "inspire growth",
-      "subheadline": "A transparent tipping platform that connects guests, staff, and management. Built for Bali's hospitality industry.",
+      "subheadline": "A tipping platform that works for venues, staff, and guests at once: guests pay in seconds, the team sees their balance, you stay fully transparent.",
       "cta": "Get started free",
       "watchDemo": "Watch demo",
       "learnMore": "Learn more",
@@ -29,6 +29,111 @@
       "platformFee": "Platform fee for beta",
       "transparent": "Transparent",
       "available": "Available"
+    },
+    "impact": {
+      "title": "Value for guests, staff, and owners",
+      "subtitle": "Tips become transparent for teams, effortless for guests, and controlled for owners.",
+      "owners": {
+        "title": "For venues",
+        "pill": "15 minutes to launch",
+        "desc": "Control tips and distribute transparently with no extra terminals."
+      },
+      "team": {
+        "title": "For staff",
+        "pill": "up to +28% in tips",
+        "desc": "Balance, personal QRs, and payouts with zero mystery spreadsheets."
+      },
+      "guests": {
+        "title": "For guests",
+        "pill": "7-second checkout",
+        "desc": "Scan, pick an amount, pay with Apple/Google Pay or QRIS — no app needed."
+      }
+    },
+    "valueDeck": {
+      "title": "We cover every side of the table",
+      "subtitle": "Each Tipsio screen reflects what matters to guests, staff, and management.",
+      "venues": {
+        "title": "For venues",
+        "point1": "Clear tipping rules without POS integrations or new hardware.",
+        "point2": "Dashboard that mirrors the back office: shifts, leaders, and amounts per QR.",
+        "point3": "Use pooled, role-based, shift-based, or personal payouts — your rules, documented."
+      },
+      "staff": {
+        "title": "For staff",
+        "point1": "Personal QRs and badges you can show a guest in a second.",
+        "point2": "Balance and upcoming payouts without hidden spreadsheets.",
+        "point3": "Push alerts for every tip so growth is visible."
+      },
+      "guests": {
+        "title": "For guests",
+        "point1": "No terminals: works with a phone camera and Apple/Google Pay.",
+        "point2": "Interface in the guest's language — quick and form-free.",
+        "point3": "Smart presets that lift average tip without pressure."
+      }
+    },
+    "productShowcase": {
+      "title": "What Tipsio looks like",
+      "subtitle": "A light guest flow plus a dark, data-rich dashboard.",
+      "guest": {
+        "title": "Guest screen",
+        "desc": "Scan a QR, choose an amount, and pay with Apple Pay, Google Pay, or QRIS in seconds."
+      },
+      "dashboard": {
+        "title": "Venue dashboard",
+        "desc": "Shift cards, daily leaders, payout control, and instant tip notifications."
+      },
+      "payouts": {
+        "title": "Allocation",
+        "desc": "Fair payouts by role, shift, or personal mode — visible to the whole team."
+      }
+    },
+    "featuresNew": {
+      "title": "Features that hold up during a real shift",
+      "subtitle": "Mobile, secure, and free of extra steps.",
+      "items": {
+        "f1": {
+          "title": "Live QRs",
+          "desc": "QRs for tables and staff with dynamic links and print-ready layouts."
+        },
+        "f2": {
+          "title": "Instant notifications",
+          "desc": "The team sees every tip right away — motivation goes up."
+        },
+        "f3": {
+          "title": "Dashboard without manual spreadsheets",
+          "desc": "See who brought what, what to pay out, and which shifts are growing."
+        },
+        "f4": {
+          "title": "Anti-fraud and safety",
+          "desc": "Payments run through Midtrans and Apple/Google Pay. We never store card data."
+        },
+        "f5": {
+          "title": "Multilingual UI",
+          "desc": "English, Indonesian, Russian — guests and staff feel taken care of."
+        },
+        "f6": {
+          "title": "Go live in an hour",
+          "desc": "Connect Midtrans, import staff, print QRs. You’re ready to accept tips."
+        }
+      }
+    },
+    "journey": {
+      "title": "Onboarding",
+      "subtitle": "How Tipsio fits into your day — from setup to the first thank-yous.",
+      "steps": {
+        "s1": {
+          "title": "Launch",
+          "desc": "Connect Midtrans, set roles, print QRs for tables and badges."
+        },
+        "s2": {
+          "title": "Live shift",
+          "desc": "Guests pay in 7 seconds, staff get notifications, you see shift trends live."
+        },
+        "s3": {
+          "title": "Payouts and growth",
+          "desc": "Allocate by role or personally, close payouts, and spot trends to retain talent."
+        }
+      }
     },
     "howNew": {
       "title": "Simple by design",
@@ -172,8 +277,8 @@
       "secondaryCta": "Talk to us on WhatsApp"
     },
     "ctaNew": {
-      "title": "Ready to get started?",
-      "subtitle": "Join Bali's leading restaurants and cafes. Setup takes less than an hour."
+      "title": "The fastest way to tidy up tipping",
+      "subtitle": "Connect Tipsio, launch on a few tables, and watch how your team responds."
     },
     "footer": {
       "staffLogin": "Staff login",
