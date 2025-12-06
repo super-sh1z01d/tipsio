@@ -171,3 +171,39 @@
 .delay-2000 {
   animation-delay: 2s;
 }
+
+
+/* Оптимизированные CSS анимации для лендинга */
+@keyframes fade-in-down {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-down {
+  animation: fade-in-down 0.5s ease-out forwards;
+}
+
+/* Плавающие элементы - CSS вместо JS */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float 4s ease-in-out infinite;
+  animation-delay: 0.6s;
+}
