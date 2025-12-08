@@ -1,6 +1,26 @@
 {
   "landing": {
     "betaBadge": "Tipsio 2.0 is here",
+    "navNew": {
+      "value": "Value",
+      "product": "Product",
+      "features": "Features",
+      "login": "Login",
+      "start": "Get started"
+    },
+    "dashboard": {
+      "today": "Today",
+      "date": "Friday, December 5",
+      "week": "Week",
+      "month": "Month",
+      "tipsToday": "Tips today",
+      "transactions": "Transactions",
+      "avgTip": "Average tip",
+      "activeQr": "Active QRs",
+      "dynamics": "Dynamics",
+      "newTip": "New tip",
+      "teamGrowing": "Team is growing!"
+    },
     "nav": {
       "features": "Features",
       "howItWorks": "How it works",
@@ -85,6 +105,13 @@
       "payouts": {
         "title": "Allocation",
         "desc": "Fair payouts by role, shift, or personal mode — visible to the whole team."
+      },
+      "customAmount": "Custom",
+      "leaveTip": "Leave a tip",
+      "stats": {
+        "today": "Today",
+        "shift": "This shift",
+        "payouts": "Payouts"
       }
     },
     "featuresNew": {

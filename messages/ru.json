@@ -1,6 +1,26 @@
 {
   "landing": {
     "betaBadge": "Tipsio 2.0 уже здесь",
+    "navNew": {
+      "value": "Ценность",
+      "product": "Продукт",
+      "features": "Возможности",
+      "login": "Вход",
+      "start": "Начать"
+    },
+    "dashboard": {
+      "today": "Сегодня",
+      "date": "Пятница, 5 декабря",
+      "week": "Неделя",
+      "month": "Месяц",
+      "tipsToday": "Чаевые сегодня",
+      "transactions": "Транзакций",
+      "avgTip": "Средний чек",
+      "activeQr": "Активных QR",
+      "dynamics": "Динамика",
+      "newTip": "Новые чаевые",
+      "teamGrowing": "Команда растёт!"
+    },
     "nav": {
       "features": "Возможности",
       "howItWorks": "Как это работает",
@@ -85,6 +105,13 @@
       "payouts": {
         "title": "Распределение",
         "desc": "Честные выплаты по ролям, сменам или персонально — прозрачно для всей команды."
+      },
+      "customAmount": "Своя сумма",
+      "leaveTip": "Оставить чаевые",
+      "stats": {
+        "today": "Сегодня",
+        "shift": "За смену",
+        "payouts": "Выплаты"
       }
     },
     "featuresNew": {
