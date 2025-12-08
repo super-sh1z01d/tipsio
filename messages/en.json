@@ -1,4 +1,129 @@
 {
+  "landingV3": {
+    "nav": {
+      "support": "Support",
+      "login": "Login",
+      "cta": "Connect venue"
+    },
+    "hero": {
+      "badge": "Works in Bali · 0% fee (Beta)",
+      "headline": "Don't lose tips because",
+      "headlineHighlight": "guests don't have cash",
+      "subheadline": "Tourists prefer paying by phone. Let them tip via QRIS, GoPay or card in 7 seconds. Money goes directly to your Midtrans account.",
+      "cta": "Launch free in 1 hour",
+      "trust1": "Direct payouts (no middlemen)",
+      "trust2": "No app needed for guests"
+    },
+    "dashboard": {
+      "today": "Today",
+      "date": "Friday, December 6",
+      "week": "Week",
+      "month": "Month",
+      "tipsToday": "Tips today",
+      "transactions": "Transactions",
+      "avgTip": "Average tip",
+      "activeQr": "Active QRs",
+      "dynamics": "Dynamics",
+      "newTip": "New tip",
+      "staff": "staff"
+    },
+    "logoBar": {
+      "title": "Guests pay the way they prefer"
+    },
+    "problem": {
+      "title": "Cash is disappearing year by year",
+      "desc1": "Your guests want to thank the service but feel awkward when their wallet is empty. Without a convenient way to tip, you lose a significant part of staff income.",
+      "desc2": "turns \"Thanks, but I only have a card\" into real money for your team. No terminals needed.",
+      "phoneCta": "Pay with Google Pay",
+      "phoneSecure": "Secure payment via Midtrans",
+      "phoneSayThanks": "Say thanks!",
+      "badge1Label": "Payment in",
+      "badge1Value": "7 seconds",
+      "badge2Label": "For guest",
+      "badge2Value": "No app needed",
+      "badge3Label": "Payments",
+      "badge3Value": "Via Midtrans",
+      "badge4Label": "Money",
+      "badge4Value": "Direct to you"
+    },
+    "howItWorks": {
+      "title": "Full control and transparency",
+      "subtitle": "Three steps to secure digital tips",
+      "step1": {
+        "label": "Safe",
+        "title": "Your Midtrans — Your rules",
+        "desc": "Connect your existing Midtrans account. We don't touch the money — transactions go directly from guest to you."
+      },
+      "step2": {
+        "label": "Fast",
+        "title": "QR codes everywhere",
+        "desc": "Place QRs on tables, in bill folders or on badges. Guest scans → picks amount → pays in 2 taps."
+      },
+      "step3": {
+        "label": "Fair",
+        "title": "Smart balance",
+        "desc": "The system calculates how much each staff member earned (or the shared pool). At shift end you see exact payout amounts."
+      }
+    },
+    "productDemo": {
+      "title": "Built for tourists and expats",
+      "point1": "English interface",
+      "point2": "No registration for guests",
+      "point3": "Preset amounts increase average tip",
+      "statsTransactions": "Transactions",
+      "statsAvgTip": "Avg tip",
+      "statsActiveQr": "Active QRs"
+    },
+    "benefits": {
+      "title": "Everyone wins",
+      "business": {
+        "title": "Business: Team retention",
+        "desc": "Good tips are the best motivation. Reduce turnover by giving staff a legal way to earn more from cashless guests."
+      },
+      "team": {
+        "title": "Team: Fairness",
+        "desc": "Waiters see their earnings in real time. No disputes about who earned what during the shift."
+      },
+      "guests": {
+        "title": "Guests: Comfort",
+        "desc": "No guilt about not having cash. Pay in 2 clicks, fee can be set to be paid by guest (on top of tip)."
+      }
+    },
+    "faq": {
+      "title": "Owner questions",
+      "q1": {
+        "q": "Do I need to open a new account?",
+        "a": "No, if you already have Midtrans, we integrate with it. If not — we'll help you connect."
+      },
+      "q2": {
+        "q": "Does money go through Tipsio accounts?",
+        "a": "Never. Technically money flows: Guest card → Your Midtrans → Your bank account. We only provide IT infrastructure."
+      },
+      "q3": {
+        "q": "How much does it cost for venues?",
+        "a": "Currently the service is completely free (Beta). In the future, the fee will be 5%, but you can set it to be paid by the guest (on top of the tip amount)."
+      },
+      "q4": {
+        "q": "How to pay taxes?",
+        "a": "Tips (Service Charge / Gratuity) have their specifics in Indonesia. Tipsio provides detailed reports for your accounting to keep everything compliant."
+      },
+      "q5": {
+        "q": "Does staff need internet?",
+        "a": "Only to check balance. To receive tips, only a printed QR code is needed."
+      }
+    },
+    "finalCta": {
+      "title": "Bring tips back to your venue today",
+      "subtitle": "Setup takes less than an hour. We'll help at every step via WhatsApp.",
+      "cta": "Connect venue for free"
+    },
+    "footer": {
+      "whatsapp": "WhatsApp Support",
+      "terms": "Terms of Service",
+      "privacy": "Privacy Policy",
+      "copyright": "© 2025 Tipsio Bali. Made with ❤️ in Canggu"
+    }
+  },
   "landing": {
     "betaBadge": "Tipsio 2.0 is here",
     "navNew": {
