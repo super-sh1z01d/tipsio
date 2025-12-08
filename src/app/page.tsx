@@ -98,7 +98,7 @@ const Navigation = () => {
 const HeroSection = () => {
   const t = useTranslations("landingV3");
   return (
-    <section className="pt-28 pb-20 px-6 bg-gradient-to-b from-slate-50 to-white overflow-hidden">
+    <section className="pt-24 sm:pt-28 pb-12 sm:pb-20 px-4 sm:px-6 bg-gradient-to-b from-slate-50 to-white overflow-hidden">
       <div className="max-w-6xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div>
@@ -218,7 +218,7 @@ const HeroSection = () => {
 const LogoBar = () => {
   const t = useTranslations("landingV3");
   return (
-    <section className="py-8 px-6 bg-slate-50 border-y border-slate-100">
+    <section className="py-8 px-4 sm:px-6 bg-slate-50 border-y border-slate-100">
       <div className="max-w-4xl mx-auto">
         <p className="text-center text-sm text-slate-500 mb-6">{t("logoBar.title")}</p>
         <div className="flex flex-wrap justify-center items-center gap-8 opacity-60 grayscale">
@@ -238,11 +238,11 @@ const LogoBar = () => {
 const ProblemSection = () => {
   const t = useTranslations("landingV3");
   return (
-    <section className="py-20 px-6 bg-white">
+    <section className="py-12 sm:py-20 px-4 sm:px-6 bg-white">
       <div className="max-w-6xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           <motion.div variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} transition={{ duration: 0.5 }}>
-            <h2 className="text-3xl sm:text-4xl font-heading font-bold text-slate-900 mb-6">{t("problem.title")}</h2>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-bold text-slate-900 mb-6">{t("problem.title")}</h2>
             <p className="text-lg text-slate-600 leading-relaxed mb-6">{t("problem.desc1")}</p>
             <p className="text-lg text-slate-600 leading-relaxed">
               <span className="font-semibold text-slate-900">Tipsio</span> {t("problem.desc2")}
@@ -308,10 +308,10 @@ const HowItWorksSection = () => {
     { icon: BarChart3, label: t("howItWorks.step3.label"), title: t("howItWorks.step3.title"), desc: t("howItWorks.step3.desc"), color: "bg-purple-100 text-purple-600" },
   ];
   return (
-    <section className="py-20 px-6 bg-slate-50">
+    <section className="py-12 sm:py-20 px-4 sm:px-6 bg-slate-50">
       <div className="max-w-6xl mx-auto">
-        <motion.div variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-heading font-bold text-slate-900 mb-4">{t("howItWorks.title")}</h2>
+        <motion.div variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-bold text-slate-900 mb-4">{t("howItWorks.title")}</h2>
           <p className="text-lg text-slate-600 max-w-2xl mx-auto">{t("howItWorks.subtitle")}</p>
         </motion.div>
         <div className="grid md:grid-cols-3 gap-6">
@@ -336,11 +336,11 @@ const HowItWorksSection = () => {
 const ProductDemoSection = () => {
   const t = useTranslations("landingV3");
   return (
-    <section className="py-20 px-6 bg-white">
+    <section className="py-12 sm:py-20 px-4 sm:px-6 bg-white">
       <div className="max-w-6xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           <motion.div variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>
-            <h2 className="text-3xl sm:text-4xl font-heading font-bold text-slate-900 mb-6">{t("productDemo.title")}</h2>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-bold text-slate-900 mb-6">{t("productDemo.title")}</h2>
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
                 <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5"><span className="text-blue-600 text-sm">✓</span></div>
@@ -400,10 +400,10 @@ const BenefitsSection = () => {
     { icon: Heart, title: t("benefits.guests.title"), desc: t("benefits.guests.desc"), color: "bg-pink-600" },
   ];
   return (
-    <section className="py-20 px-6 bg-slate-900 text-white">
+    <section className="py-12 sm:py-20 px-4 sm:px-6 bg-slate-900 text-white">
       <div className="max-w-6xl mx-auto">
-        <motion.div variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-heading font-bold mb-4">{t("benefits.title")}</h2>
+        <motion.div variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-bold mb-4">{t("benefits.title")}</h2>
         </motion.div>
         <div className="grid md:grid-cols-3 gap-6">
           {benefits.map((benefit, idx) => (
@@ -431,10 +431,10 @@ const FAQSection = () => {
   ];
   const [openIndex, setOpenIndex] = useState<number | null>(0);
   return (
-    <section className="py-20 px-6 bg-white">
+    <section className="py-12 sm:py-20 px-4 sm:px-6 bg-white">
       <div className="max-w-3xl mx-auto">
-        <motion.div variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-heading font-bold text-slate-900 mb-4">{t("faq.title")}</h2>
+        <motion.div variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-bold text-slate-900 mb-4">{t("faq.title")}</h2>
         </motion.div>
         <div className="space-y-3">
           {faqs.map((faq, idx) => (
@@ -458,9 +458,9 @@ const FAQSection = () => {
 const FinalCTASection = () => {
   const t = useTranslations("landingV3");
   return (
-    <section className="py-24 px-6 bg-gradient-to-br from-blue-600 to-indigo-700 text-white">
+    <section className="py-16 sm:py-24 px-4 sm:px-6 bg-gradient-to-br from-blue-600 to-indigo-700 text-white">
       <div className="max-w-4xl mx-auto text-center">
-        <motion.h2 variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold mb-6">
+        <motion.h2 variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-2xl sm:text-3xl lg:text-5xl font-heading font-bold mb-6">
           {t("finalCta.title")}
         </motion.h2>
         <motion.p variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} transition={{ delay: 0.1 }} className="text-lg text-blue-100 mb-10 max-w-2xl mx-auto">
@@ -483,8 +483,8 @@ const FinalCTASection = () => {
 const Footer = () => {
   const t = useTranslations("landingV3");
   return (
-    <footer className="py-10 px-6 bg-slate-900 text-slate-400">
-      <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+    <footer className="py-8 sm:py-10 px-4 sm:px-6 bg-slate-900 text-slate-400">
+      <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6">
         <Link href="/" className="text-xl font-heading font-bold text-gradient">Tipsio</Link>
         <div className="flex gap-6 text-sm">
           <a href="https://wa.me/message" className="hover:text-white transition-colors flex items-center gap-2"><MessageCircle size={16} />{t("footer.whatsapp")}</a>
@@ -500,7 +500,7 @@ const Footer = () => {
 // ============ MAIN PAGE ============
 export default function Home() {
   return (
-    <main className="min-h-screen bg-white text-slate-900">
+    <main className="min-h-screen bg-white text-slate-900 overflow-x-hidden">
       <Navigation />
       <HeroSection />
       <LogoBar />
