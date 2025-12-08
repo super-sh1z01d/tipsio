@@ -31,7 +31,7 @@ const fadeInUp = {
 const Navigation = () => (
   <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-slate-200/50">
     <nav className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-      <Link href="/" className="text-2xl font-heading font-bold text-gradient">
+      <Link href="/landing-v3" className="text-2xl font-heading font-bold text-gradient">
         Tipsio
       </Link>
 
@@ -770,7 +770,7 @@ const FinalCTASection = () => (
 const Footer = () => (
   <footer className="py-10 px-6 bg-slate-900 text-slate-400">
     <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-      <Link href="/" className="text-xl font-heading font-bold text-gradient">
+      <Link href="/landing-v3" className="text-xl font-heading font-bold text-gradient">
         Tipsio
       </Link>
 
