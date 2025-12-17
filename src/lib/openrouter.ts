@@ -21,10 +21,12 @@ interface OpenRouterChatCompletionResponse {
   };
 }
 
-export type OpenRouterImageInput = {
-  mimeType: string;
-  data: Buffer;
-};
+export type OpenRouterImageInput =
+  | { url: string }
+  | {
+      mimeType: string;
+      data: Buffer;
+    };
 
 /**
  * Configuration for the OpenRouter client.
@@ -57,7 +59,7 @@ export class OpenRouterClient {
     this.visionModel =
       config?.visionModel ||
       process.env.OPENROUTER_VISION_MODEL ||
-      'google/gemini-2.0-flash-001';
+      'qwen/qwen2.5-vl-72b-instruct';
     this.textModel =
       config?.textModel ||
       process.env.OPENROUTER_TEXT_MODEL ||
@@ -142,10 +144,16 @@ export class OpenRouterClient {
         role: 'user',
         content: [
           { type: 'text', text: 'Extract all text from this menu image. Return the text content for each page/image in a structured JSON format, where each page has an array of lines of text. Do not include any other text or explanation, only the JSON.' },
-          ...images.map(({ mimeType, data }) => ({
-            type: 'image_url',
-            image_url: { url: `data:${mimeType};base64,${data.toString('base64')}` },
-          }))
+          ...images.map((image) => {
+            if ('url' in image) {
+              return { type: 'image_url', image_url: { url: image.url } };
+            }
+
+            return {
+              type: 'image_url',
+              image_url: { url: `data:${image.mimeType};base64,${image.data.toString('base64')}` },
+            };
+          })
         ],
       },
     ];

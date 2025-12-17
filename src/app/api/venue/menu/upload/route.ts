@@ -12,6 +12,15 @@ import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import { promises as fs } from 'fs';
 
+function isPublicBaseUrl(baseUrl: string) {
+  try {
+    const url = new URL(baseUrl);
+    return !['localhost', '127.0.0.1', '0.0.0.0'].includes(url.hostname);
+  } catch {
+    return false;
+  }
+}
+
 async function getManagerVenueIdOrError() {
   const session = await auth();
 
@@ -76,7 +85,9 @@ export async function POST(req: Request) {
     // Ensure upload directory exists
     await fs.mkdir(uploadDir, { recursive: true });
 
-    const fileInputs: OpenRouterImageInput[] = [];
+    const baseUrl = process.env.NEXTAUTH_URL || new URL(req.url).origin;
+    const useRemoteUrls = isPublicBaseUrl(baseUrl);
+    const imageInputs: OpenRouterImageInput[] = [];
 
     for (const file of files) {
       const fileExtension =
@@ -90,7 +101,11 @@ export async function POST(req: Request) {
       await fs.writeFile(filePath, buffer);
       writtenFilePaths.push(filePath);
       imageUrls.push(publicPath);
-      fileInputs.push({ mimeType: file.type, data: buffer }); // Collect data for AI processing
+      if (useRemoteUrls) {
+        imageInputs.push({ url: new URL(publicPath, baseUrl).toString() });
+      } else {
+        imageInputs.push({ mimeType: file.type, data: buffer });
+      }
     }
 
     // 2. Create MenuDigitizationJob
@@ -103,7 +118,7 @@ export async function POST(req: Request) {
     });
 
     // 3. Call AI Pipeline
-    const { structuredMenu, rawOcrResponse, rawLlmResponse } = await processMenuDigitization(fileInputs);
+    const { structuredMenu, rawOcrResponse, rawLlmResponse } = await processMenuDigitization(imageInputs);
 
     // 4. Create MenuCategory and MenuItem records on success
     await prisma.$transaction(async (tx) => {
