@@ -246,7 +246,9 @@ export class OpenRouterClient {
       - approxCalories: Approximate calorie count (e.g., 320 for "~320 kcal", null if not found).
       - isLocalSpecial: true if the item is a local specialty, otherwise false.
 
-      Group items under categories. If categories are not explicitly mentioned, try to infer them or group similar items.
+      Group items under categories. Look for visual cues (headings, price blocks, blank lines) and split the menu into multiple categories whenever possible.
+      If the text contains more than one logical section, create a dedicated category per section and give it a descriptive name (e.g., "Drinks", "Appetizers", "Mains", "Desserts").
+      If you cannot find clear headings, infer meaningful groups from the dishes (e.g., beverages, sides, protein dishes).
       If a category has no name, use a default like "General" or "Miscellaneous".
 
       Output rules (strict):
