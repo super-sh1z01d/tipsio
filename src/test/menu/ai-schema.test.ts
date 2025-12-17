@@ -46,12 +46,12 @@ describe('AI Response JSON Schema Validation (Property-Based Tests)', () => {
           fc.record({
             nameEn: fc.string({ minLength: 1 }),
             nameOriginal: fc.option(fc.string()),
-            nameRu: fc.option(fc.string()),
+            nameRu: fc.string({ minLength: 1 }),
             items: fc.array(
               fc.record({
                 originalName: fc.string({ minLength: 1 }),
                 nameEn: fc.string({ minLength: 1 }),
-                nameRu: fc.option(fc.string()),
+                nameRu: fc.string({ minLength: 1 }),
                 priceValue: fc.option(fc.integer({ min: 0 })),
                 priceCurrency: fc.string().filter(s => s.length <= 3).map(s => s.toUpperCase()).filter(s => s.length > 0), // Simple currency string
                 descriptionEn: fc.option(fc.string()),
@@ -126,4 +126,3 @@ describe('AI Response JSON Schema Validation (Property-Based Tests)', () => {
     expect(() => JSON.parse('')).toThrow();
   });
 });
-

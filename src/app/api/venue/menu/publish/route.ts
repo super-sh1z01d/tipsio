@@ -37,6 +37,13 @@ export async function POST() {
     const latestJob = await prisma.menuDigitizationJob.findFirst({
       where: { venueId },
       orderBy: { createdAt: 'desc' },
+      include: {
+        categories: {
+          include: {
+            items: true,
+          },
+        },
+      },
     });
 
     if (!latestJob) {
@@ -53,6 +60,28 @@ export async function POST() {
     
     if (latestJob.isPublished) {
         return NextResponse.json({ message: 'Menu is already published' }, { status: 200 });
+    }
+
+    // Enforce mandatory RU/EN translations for names before publishing.
+    const invalidCategories = latestJob.categories.filter(
+      (category) => !category.nameEn?.trim?.() || !category.nameRu?.trim?.()
+    );
+    const invalidItems = latestJob.categories.flatMap((category) =>
+      category.items.filter((item) => !item.nameEn?.trim?.() || !item.nameRu?.trim?.())
+    );
+
+    if (invalidCategories.length > 0 || invalidItems.length > 0) {
+      return NextResponse.json(
+        {
+          message:
+            'Menu cannot be published: English and Russian names are required for all categories and items.',
+          invalid: {
+            categoryCount: invalidCategories.length,
+            itemCount: invalidItems.length,
+          },
+        },
+        { status: 400 }
+      );
     }
 
     const publishedJob = await publishMenuJob(prisma, venueId, latestJob.id);

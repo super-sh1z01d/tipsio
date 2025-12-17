@@ -224,7 +224,7 @@ export function normalizeOcrResult(raw: unknown): OcrResult {
 export const MenuItemSchema = z.object({
   originalName: z.string().min(1, "Original name cannot be empty."),
   nameEn: z.string().min(1, "English name cannot be empty."),
-  nameRu: z.string().nullable(),
+  nameRu: z.string().min(1, "Russian name cannot be empty."),
   priceValue: z.number().int().min(0).nullable(), // Price in smallest currency unit, can be null
   priceCurrency: z.string().default("IDR"),
   descriptionEn: z.string().nullable(),
@@ -237,7 +237,7 @@ export const MenuItemSchema = z.object({
 export const MenuCategorySchema = z.object({
   nameEn: z.string().min(1, "English category name cannot be empty."),
   nameOriginal: z.string().nullable(),
-  nameRu: z.string().nullable(),
+  nameRu: z.string().min(1, "Russian category name cannot be empty."),
   items: z.array(MenuItemSchema),
 });
 

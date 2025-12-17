@@ -9,13 +9,13 @@ const MenuUpdatePayloadSchema = z.object({
     z.object({
       nameEn: z.string().min(1),
       nameOriginal: z.string().nullable().optional(),
-      nameRu: z.string().nullable().optional(),
+      nameRu: z.string().min(1),
       order: z.number().int().min(0).optional(),
       items: z.array(
         z.object({
           originalName: z.string().min(1),
           nameEn: z.string().min(1),
-          nameRu: z.string().nullable().optional(),
+          nameRu: z.string().min(1),
           descriptionEn: z.string().nullable().optional(),
           descriptionRu: z.string().nullable().optional(),
           priceValue: z.number().int().min(0).nullable().optional(),
@@ -208,6 +208,12 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ message: 'Menu updated successfully' }, { status: 200 });
   } catch (error: unknown) {
     console.error('Error updating menu data:', error);
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { message: 'Invalid menu data', issues: error.issues },
+        { status: 400 }
+      );
+    }
     return NextResponse.json(
       { message: 'Failed to update menu data', error: error instanceof Error ? error.message : String(error) },
       { status: 500 }

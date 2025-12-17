@@ -209,7 +209,7 @@ export class OpenRouterClient {
       For each menu item, provide the following fields:
       - originalName: The exact name of the item as it appears in the text.
       - nameEn: English translation of the item name.
-      - nameRu: Russian translation of the item name (if possible, otherwise null).
+      - nameRu: Russian translation of the item name (ALWAYS provide; if unsure, transliterate into Cyrillic).
       - descriptionEn: English description of the item (if available, otherwise null).
       - descriptionRu: Russian description of the item (if available, otherwise null).
       - priceValue: The numeric price of the item (e.g., 15000 for Rp15.000, null if not found).
@@ -224,6 +224,7 @@ export class OpenRouterClient {
       Output rules (strict):
       - Return a SINGLE JSON object matching the interface below.
       - Do NOT omit any keys. If a value is unknown or missing, set it to null (for nullable fields) or a sensible default.
+      - nameEn and nameRu MUST be non-empty strings (no null). If you cannot translate nameRu, transliterate into Cyrillic.
       - Use boolean false when unsure for flags.
       - Use "IDR" when currency is missing.
       - priceValue and approxCalories MUST be numbers (or null), not strings.
@@ -233,11 +234,11 @@ export class OpenRouterClient {
         categories: {
           nameEn: string;
           nameOriginal: string | null; // Original name of the category from the text
-          nameRu: string | null;
+          nameRu: string;
           items: {
             originalName: string;
             nameEn: string;
-            nameRu: string | null;
+            nameRu: string;
             priceValue: number | null;
             priceCurrency: string;
             descriptionEn: string | null;
