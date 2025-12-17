@@ -95,8 +95,8 @@ export default function MenuUploadPage() {
       }
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || t('error'));
+        const data = await response.json().catch(() => null);
+        throw new Error(data?.error || data?.message || t('error'));
       }
 
       // Success - redirect to editor

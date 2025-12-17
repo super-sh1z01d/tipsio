@@ -28,6 +28,8 @@ interface OpenRouterConfig {
   apiKey: string;
   baseUrl?: string;
   timeoutMs?: number;
+  visionModel?: string;
+  textModel?: string;
 }
 
 /**
@@ -37,6 +39,8 @@ export class OpenRouterClient {
   private apiKey: string;
   private baseUrl: string;
   private timeoutMs: number;
+  private visionModel: string;
+  private textModel: string;
 
   constructor(config?: Partial<OpenRouterConfig>) {
     this.apiKey = config?.apiKey || process.env.OPENROUTER_API_KEY || '';
@@ -45,6 +49,14 @@ export class OpenRouterClient {
     }
     this.baseUrl = config?.baseUrl || 'https://openrouter.ai/api/v1';
     this.timeoutMs = config?.timeoutMs || 90 * 1000; // Default 90 seconds
+    this.visionModel =
+      config?.visionModel ||
+      process.env.OPENROUTER_VISION_MODEL ||
+      'google/gemini-2.0-flash-001';
+    this.textModel =
+      config?.textModel ||
+      process.env.OPENROUTER_TEXT_MODEL ||
+      this.visionModel;
   }
 
   /**
@@ -134,7 +146,7 @@ export class OpenRouterClient {
     ];
 
     const body = {
-      model: 'google/gemini-3.0-pro', // Using Gemini 3.0 Pro
+      model: this.visionModel,
       messages: messages,
       response_format: { type: 'json_object' }, // Requesting JSON output
       temperature: 0, // For deterministic OCR
@@ -224,7 +236,7 @@ export class OpenRouterClient {
     ];
 
     const body = {
-      model: 'google/gemini-3.0-pro', // Using Gemini 3.0 Pro
+      model: this.textModel,
       messages: messages,
       response_format: { type: 'json_object' }, // Requesting JSON output
       temperature: 0.2, // A bit higher temperature for creativity in translations, but still focused
@@ -245,6 +257,5 @@ export class OpenRouterClient {
     }
   }
 }
-
 
 
