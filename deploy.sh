@@ -18,6 +18,7 @@ ssh $USER@$SERVER "mkdir -p $APP_DIR"
 # Copy files to server
 echo "📦 Copying files to server..."
 rsync -avz --exclude 'node_modules' --exclude '.next' --exclude '.git' \
+  --exclude '.env' --exclude '.env.*' \
   ./ $USER@$SERVER:$APP_DIR/
 
 # Deploy on server
