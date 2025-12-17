@@ -95,7 +95,7 @@ export async function POST(req: Request) {
         (file.type === 'image/png' ? '.png' : '.jpg');
       const filename = `${uuidv4()}${fileExtension}`;
       const filePath = path.join(uploadDir, filename);
-      const publicPath = `/uploads/menu/${venueId}/${filename}`; // Public URL path
+      const publicPath = `/api/uploads/menu/${venueId}/${filename}`; // Public URL path (served dynamically)
 
       const buffer = Buffer.from(await file.arrayBuffer());
       await fs.writeFile(filePath, buffer);
