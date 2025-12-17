@@ -6,7 +6,7 @@ import {
   validateFileSize,
   validateFileCount,
 } from '@/lib/menu-upload';
-import { processMenuDigitization } from '@/lib/menu-ai';
+import { MenuDigitizationError, processMenuDigitization } from '@/lib/menu-ai';
 import type { OpenRouterImageInput } from '@/lib/openrouter';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
@@ -112,13 +112,28 @@ export async function POST(req: Request) {
     job = await prisma.menuDigitizationJob.create({
       data: {
         venueId,
-        status: 'PROCESSING',
+        status: 'QUEUED',
         imageUrls: imageUrls,
       },
     });
 
+    // Mark as processing right before starting the AI pipeline (Requirement 3.1)
+    job = await prisma.menuDigitizationJob.update({
+      where: { id: job.id },
+      data: { status: 'PROCESSING' },
+    });
+
     // 3. Call AI Pipeline
     const { structuredMenu, rawOcrResponse, rawLlmResponse } = await processMenuDigitization(imageInputs);
+
+    // Persist raw AI responses ASAP for debugging (Requirement 3.8)
+    await prisma.menuDigitizationJob.update({
+      where: { id: job.id },
+      data: {
+        rawOcrResponse,
+        rawLlmResponse,
+      },
+    });
 
     // 4. Create MenuCategory and MenuItem records on success
     await prisma.$transaction(async (tx) => {
@@ -188,6 +203,15 @@ export async function POST(req: Request) {
   } catch (error: unknown) {
     console.error('Menu upload API error:', error);
 
+    const rawOcrResponse =
+      error instanceof MenuDigitizationError
+        ? error.rawOcrResponse ?? undefined
+        : undefined;
+    const rawLlmResponse =
+      error instanceof MenuDigitizationError
+        ? error.rawLlmResponse ?? undefined
+        : undefined;
+
     // Update job status to FAILED if it was created
     if (job) {
       await prisma.menuDigitizationJob.update({
@@ -195,6 +219,8 @@ export async function POST(req: Request) {
         data: {
           status: 'FAILED',
           errorMessage: error instanceof Error ? error.message : String(error) || 'Unknown error during digitization',
+          rawOcrResponse,
+          rawLlmResponse,
         },
       });
     }

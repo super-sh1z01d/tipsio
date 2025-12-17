@@ -22,6 +22,200 @@ export const OcrResultSchema = z.object({
  */
 export type OcrResult = z.infer<typeof OcrResultSchema>;
 
+export class MenuDigitizationError extends Error {
+  public readonly rawOcrResponse: string | null;
+  public readonly rawLlmResponse: string | null;
+
+  constructor(
+    message: string,
+    options?: {
+      rawOcrResponse?: string;
+      rawLlmResponse?: string;
+      cause?: unknown;
+    }
+  ) {
+    super(message, options?.cause ? { cause: options.cause } : undefined);
+    this.name = 'MenuDigitizationError';
+    this.rawOcrResponse = options?.rawOcrResponse?.length ? options.rawOcrResponse : null;
+    this.rawLlmResponse = options?.rawLlmResponse?.length ? options.rawLlmResponse : null;
+  }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function normalizeTextToLines(text: string): string[] {
+  return text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+}
+
+function parseModelJson(content: string): unknown {
+  try {
+    return JSON.parse(content);
+  } catch (error) {
+    // Fallback: some models may still wrap JSON in code-fences or include leading text.
+    const firstBrace = content.indexOf('{');
+    const lastBrace = content.lastIndexOf('}');
+    if (firstBrace >= 0 && lastBrace > firstBrace) {
+      const candidate = content.slice(firstBrace, lastBrace + 1);
+      try {
+        return JSON.parse(candidate);
+      } catch {
+        // Fallthrough to throw the original error below
+      }
+    }
+
+    throw new Error(
+      `Failed to parse model JSON: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+}
+
+function coerceOcrPages(raw: unknown): Array<{ pageIndex: number; lines: string[] }> {
+  const pages: Array<{ pageIndex: number; lines: string[] }> = [];
+
+  const coercePage = (pageRaw: unknown, fallbackIndex: number) => {
+    if (typeof pageRaw === 'string') {
+      pages.push({ pageIndex: fallbackIndex, lines: normalizeTextToLines(pageRaw) });
+      return;
+    }
+
+    if (Array.isArray(pageRaw)) {
+      pages.push({
+        pageIndex: fallbackIndex,
+        lines: pageRaw.map((v) => String(v)).map((l) => l.trim()).filter((l) => l.length > 0),
+      });
+      return;
+    }
+
+    if (!isRecord(pageRaw)) return;
+
+    const explicitIndex =
+      typeof pageRaw.pageIndex === 'number'
+        ? pageRaw.pageIndex
+        : typeof pageRaw.index === 'number'
+          ? pageRaw.index
+          : typeof pageRaw.page === 'number'
+            ? pageRaw.page
+            : undefined;
+
+    const pageIndex =
+      typeof explicitIndex === 'number' && Number.isInteger(explicitIndex) && explicitIndex >= 0
+        ? explicitIndex
+        : fallbackIndex;
+
+    const linesValue = pageRaw.lines ?? pageRaw.line ?? pageRaw.textLines;
+    if (Array.isArray(linesValue)) {
+      pages.push({
+        pageIndex,
+        lines: linesValue.map((v) => String(v)).map((l) => l.trim()).filter((l) => l.length > 0),
+      });
+      return;
+    }
+
+    const textValue =
+      typeof pageRaw.text === 'string'
+        ? pageRaw.text
+        : typeof pageRaw.content === 'string'
+          ? pageRaw.content
+          : typeof pageRaw.pageText === 'string'
+            ? pageRaw.pageText
+            : null;
+
+    if (typeof textValue === 'string') {
+      pages.push({ pageIndex, lines: normalizeTextToLines(textValue) });
+    }
+  };
+
+  if (Array.isArray(raw)) {
+    // Could be an array of pages, or an array of lines.
+    const looksLikePages = raw.some((entry) => isRecord(entry) || Array.isArray(entry));
+    if (looksLikePages) {
+      raw.forEach((entry, idx) => coercePage(entry, idx));
+      return pages;
+    }
+
+    pages.push({
+      pageIndex: 0,
+      lines: raw.map((v) => String(v)).map((l) => l.trim()).filter((l) => l.length > 0),
+    });
+    return pages;
+  }
+
+  if (typeof raw === 'string') {
+    pages.push({ pageIndex: 0, lines: normalizeTextToLines(raw) });
+    return pages;
+  }
+
+  if (!isRecord(raw)) return pages;
+
+  if ('pages' in raw) {
+    const rawPages = raw.pages;
+    if (Array.isArray(rawPages)) {
+      rawPages.forEach((entry, idx) => coercePage(entry, idx));
+      return pages;
+    }
+
+    if (isRecord(rawPages)) {
+      const entries = Object.entries(rawPages);
+      entries
+        .sort(([a], [b]) => {
+          const ai = Number(a);
+          const bi = Number(b);
+          if (!Number.isNaN(ai) && !Number.isNaN(bi)) return ai - bi;
+          return a.localeCompare(b);
+        })
+        .forEach(([key, value], idx) => {
+          const numericKey = Number(key);
+          const fallbackIndex = Number.isNaN(numericKey) ? idx : numericKey;
+          coercePage(value, fallbackIndex);
+        });
+      return pages;
+    }
+
+    if (typeof rawPages === 'string') {
+      pages.push({ pageIndex: 0, lines: normalizeTextToLines(rawPages) });
+      return pages;
+    }
+  }
+
+  if (Array.isArray(raw.lines)) {
+    pages.push({
+      pageIndex: 0,
+      lines: raw.lines.map((v) => String(v)).map((l) => l.trim()).filter((l) => l.length > 0),
+    });
+    return pages;
+  }
+
+  if (typeof raw.text === 'string') {
+    pages.push({ pageIndex: 0, lines: normalizeTextToLines(raw.text) });
+    return pages;
+  }
+
+  return pages;
+}
+
+export function normalizeOcrResult(raw: unknown): OcrResult {
+  const direct = OcrResultSchema.safeParse(raw);
+  if (direct.success) return direct.data;
+
+  // Unwrap common wrappers like { result: ... } or { data: ... }.
+  const unwrapped: unknown =
+    isRecord(raw) && 'result' in raw
+      ? raw.result
+      : isRecord(raw) && 'data' in raw
+        ? raw.data
+        : raw;
+
+  const directUnwrapped = OcrResultSchema.safeParse(unwrapped);
+  if (directUnwrapped.success) return directUnwrapped.data;
+
+  const pages = coerceOcrPages(unwrapped);
+  return OcrResultSchema.parse({ pages });
+}
 
 // =========================================================
 // Schemas for Text LLM (Structured Menu) Response
@@ -72,20 +266,26 @@ export async function processMenuDigitization(
 
   try {
     // Step 1: OCR - Extract text from images
-    const ocrResult = await openRouterClient.extractTextFromImages(images);
-    rawOcrResponse = JSON.stringify(ocrResult); // Store raw response
-    OcrResultSchema.parse(ocrResult); // Validate OCR result
+    rawOcrResponse = await openRouterClient.extractTextFromImages(images);
+    const ocrParsed = parseModelJson(rawOcrResponse);
+    const ocrResult = normalizeOcrResult(ocrParsed);
+    OcrResultSchema.parse(ocrResult); // Validate normalized OCR result
 
     // Step 2: Structuring - Convert extracted text into structured menu data
-    const structuredMenu = await openRouterClient.structureMenuData(ocrResult);
-    rawLlmResponse = JSON.stringify(structuredMenu); // Store raw response
-    StructuredMenuSchema.parse(structuredMenu); // Validate structured menu data
+    rawLlmResponse = await openRouterClient.structureMenuData(ocrResult);
+    const llmParsed = parseModelJson(rawLlmResponse);
+    const structuredMenu = StructuredMenuSchema.parse(llmParsed); // Validate structured menu data
 
     return { structuredMenu, rawOcrResponse, rawLlmResponse };
   } catch (error: unknown) {
     console.error('Error during menu digitization pipeline:', error);
-    // Re-throw to be caught by the API route
-    throw new Error(`Menu digitization failed: ${error instanceof Error ? error.message : String(error)}`);
+    throw new MenuDigitizationError(
+      `Menu digitization failed: ${error instanceof Error ? error.message : String(error)}`,
+      {
+        rawOcrResponse,
+        rawLlmResponse,
+        cause: error,
+      }
+    );
   }
 }
-

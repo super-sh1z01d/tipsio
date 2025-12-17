@@ -1,5 +1,5 @@
 // src/lib/openrouter.ts
-import type { OcrResult, StructuredMenu } from './menu-ai';
+import type { OcrResult } from './menu-ai';
 
 interface OpenRouterChatCompletionResponse {
   id: string;
@@ -136,14 +136,34 @@ export class OpenRouterClient {
   /**
    * Calls the OpenRouter vision model to extract text from images.
    * @param images An array of image buffers.
-   * @returns An OcrResult object with extracted text.
+   * @returns Raw JSON string content returned by the model.
    */
-  public async extractTextFromImages(images: OpenRouterImageInput[]): Promise<OcrResult> {
+  public async extractTextFromImages(images: OpenRouterImageInput[]): Promise<string> {
+    const ocrPrompt = [
+      'You are an OCR engine.',
+      'Extract ALL visible text from the provided menu image(s).',
+      'Return ONLY valid JSON (no markdown, no commentary) in EXACTLY this format:',
+      '{',
+      '  "pages": [',
+      '    { "pageIndex": 0, "lines": ["line 1", "line 2"] },',
+      '    { "pageIndex": 1, "lines": ["..."] }',
+      '  ]',
+      '}',
+      '',
+      'Rules:',
+      '- ALWAYS include the top-level key "pages" as an array.',
+      '- The number of objects in "pages" MUST equal the number of input images.',
+      '- "pageIndex" MUST be 0-based and match the order of the input images.',
+      '- "lines" MUST be an array of strings, each representing a single line of text as it appears.',
+      '- Preserve order; do not merge unrelated lines; do not invent items.',
+      '- If a page has no readable text, return an empty lines array for that page.',
+    ].join('\n');
+
     const messages = [
       {
         role: 'user',
         content: [
-          { type: 'text', text: 'Extract all text from this menu image. Return the text content for each page/image in a structured JSON format, where each page has an array of lines of text. Do not include any other text or explanation, only the JSON.' },
+          { type: 'text', text: ocrPrompt },
           ...images.map((image) => {
             if ('url' in image) {
               return { type: 'image_url', image_url: { url: image.url } };
@@ -171,26 +191,15 @@ export class OpenRouterClient {
       throw new Error('OpenRouter vision model returned an empty or invalid response.');
     }
 
-    const ocrResultContent = response.choices[0].message.content;
-    try {
-      const parsedContent = JSON.parse(ocrResultContent);
-      // Expected structure: { pages: [{ pageIndex: 0, lines: ["line1", "line2"] }] }
-      // The model might return a slightly different structure, adapt parsing if needed.
-      // For now, assume it returns something like { "text": "..." } or similar
-      // We need to refine this based on actual model output.
-      // For now, let's assume it returns a direct JSON of what we asked.
-      return parsedContent as OcrResult; // Cast directly, will validate later with Zod
-    } catch (parseError) {
-      throw new Error(`Failed to parse OCR result JSON: ${parseError}`);
-    }
+    return response.choices[0].message.content;
   }
 
   /**
    * Calls the OpenRouter text LLM to structure extracted OCR text into menu data.
    * @param ocrResult The result from the OCR vision model.
-   * @returns A StructuredMenu object.
+   * @returns Raw JSON string content returned by the model.
    */
-  public async structureMenuData(ocrResult: OcrResult): Promise<StructuredMenu> {
+  public async structureMenuData(ocrResult: OcrResult): Promise<string> {
     const extractedText = ocrResult.pages.map(page => page.lines.join('\n')).join('\n\n');
 
     const prompt = `
@@ -211,6 +220,13 @@ export class OpenRouterClient {
 
       Group items under categories. If categories are not explicitly mentioned, try to infer them or group similar items.
       If a category has no name, use a default like "General" or "Miscellaneous".
+
+      Output rules (strict):
+      - Return a SINGLE JSON object matching the interface below.
+      - Do NOT omit any keys. If a value is unknown or missing, set it to null (for nullable fields) or a sensible default.
+      - Use boolean false when unsure for flags.
+      - Use "IDR" when currency is missing.
+      - priceValue and approxCalories MUST be numbers (or null), not strings.
       
       The output MUST be a JSON object conforming to the following TypeScript interface:
       interface StructuredMenu {
@@ -238,7 +254,7 @@ export class OpenRouterClient {
       ${extractedText}
       \`\`\`
       
-      Please return only the JSON object.
+      Please return only the JSON object (no markdown, no commentary).
     `;
 
     const messages = [
@@ -261,12 +277,6 @@ export class OpenRouterClient {
       throw new Error('OpenRouter text LLM returned an empty or invalid response.');
     }
 
-    const structuredMenuContent = response.choices[0].message.content;
-    try {
-      const parsedContent = JSON.parse(structuredMenuContent);
-      return parsedContent as StructuredMenu; // Cast directly, will validate later with Zod
-    } catch (parseError) {
-      throw new Error(`Failed to parse structured menu JSON: ${parseError}`);
-    }
+    return response.choices[0].message.content;
   }
 }
