@@ -7,6 +7,7 @@ import {
   validateFileCount,
 } from '@/lib/menu-upload';
 import { processMenuDigitization } from '@/lib/menu-ai';
+import type { OpenRouterImageInput } from '@/lib/openrouter';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import { promises as fs } from 'fs';
@@ -75,7 +76,7 @@ export async function POST(req: Request) {
     // Ensure upload directory exists
     await fs.mkdir(uploadDir, { recursive: true });
 
-    const fileBuffers: Buffer[] = [];
+    const fileInputs: OpenRouterImageInput[] = [];
 
     for (const file of files) {
       const fileExtension =
@@ -89,7 +90,7 @@ export async function POST(req: Request) {
       await fs.writeFile(filePath, buffer);
       writtenFilePaths.push(filePath);
       imageUrls.push(publicPath);
-      fileBuffers.push(buffer); // Collect buffers for AI processing
+      fileInputs.push({ mimeType: file.type, data: buffer }); // Collect data for AI processing
     }
 
     // 2. Create MenuDigitizationJob
@@ -102,7 +103,7 @@ export async function POST(req: Request) {
     });
 
     // 3. Call AI Pipeline
-    const { structuredMenu, rawOcrResponse, rawLlmResponse } = await processMenuDigitization(fileBuffers);
+    const { structuredMenu, rawOcrResponse, rawLlmResponse } = await processMenuDigitization(fileInputs);
 
     // 4. Create MenuCategory and MenuItem records on success
     await prisma.$transaction(async (tx) => {

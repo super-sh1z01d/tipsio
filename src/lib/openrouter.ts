@@ -1,5 +1,5 @@
 // src/lib/openrouter.ts
-import { OcrResult, StructuredMenu } from './menu-ai';
+import type { OcrResult, StructuredMenu } from './menu-ai';
 
 interface OpenRouterChatCompletionResponse {
   id: string;
@@ -20,6 +20,11 @@ interface OpenRouterChatCompletionResponse {
     total_tokens: number;
   };
 }
+
+export type OpenRouterImageInput = {
+  mimeType: string;
+  data: Buffer;
+};
 
 /**
  * Configuration for the OpenRouter client.
@@ -131,15 +136,15 @@ export class OpenRouterClient {
    * @param images An array of image buffers.
    * @returns An OcrResult object with extracted text.
    */
-  public async extractTextFromImages(images: Buffer[]): Promise<OcrResult> {
+  public async extractTextFromImages(images: OpenRouterImageInput[]): Promise<OcrResult> {
     const messages = [
       {
         role: 'user',
         content: [
           { type: 'text', text: 'Extract all text from this menu image. Return the text content for each page/image in a structured JSON format, where each page has an array of lines of text. Do not include any other text or explanation, only the JSON.' },
-          ...images.map(imageBuffer => ({
+          ...images.map(({ mimeType, data }) => ({
             type: 'image_url',
-            image_url: { url: `data:image/jpeg;base64,${imageBuffer.toString('base64')}` },
+            image_url: { url: `data:${mimeType};base64,${data.toString('base64')}` },
           }))
         ],
       },
@@ -257,5 +262,3 @@ export class OpenRouterClient {
     }
   }
 }
-
-

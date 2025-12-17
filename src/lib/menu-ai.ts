@@ -1,6 +1,6 @@
 // src/lib/menu-ai.ts
 import { z } from 'zod';
-import { OpenRouterClient } from './openrouter';
+import { OpenRouterClient, type OpenRouterImageInput } from './openrouter';
 
 // =========================================================
 // Schemas for Vision Model (OCR) Response
@@ -64,7 +64,7 @@ export type StructuredMenu = z.infer<typeof StructuredMenuSchema>;
  * @returns The structured menu data or throws an error.
  */
 export async function processMenuDigitization(
-  images: Buffer[],
+  images: OpenRouterImageInput[],
 ): Promise<{ structuredMenu: StructuredMenu; rawOcrResponse: string; rawLlmResponse: string }> {
   const openRouterClient = new OpenRouterClient();
   let rawOcrResponse: string = '';
@@ -88,5 +88,4 @@ export async function processMenuDigitization(
     throw new Error(`Menu digitization failed: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
-
 
