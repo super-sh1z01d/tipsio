@@ -16,10 +16,12 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY package.json package-lock.json* ./
 COPY prisma ./prisma
 COPY prisma.config.ts ./prisma.config.ts
+COPY scripts/prisma-migrate.sh ./scripts/prisma-migrate.sh
+RUN chmod +x ./scripts/prisma-migrate.sh
 
 ENV NODE_ENV=production
 
-CMD ["npx", "prisma", "migrate", "deploy"]
+CMD ["./scripts/prisma-migrate.sh"]
 
 # Rebuild the source code only when needed
 FROM base AS builder
