@@ -10,6 +10,7 @@ services:
       - DATABASE_URL=postgresql://tipsio:tipsio_password@db:5432/tipsio
       - NEXTAUTH_URL=https://tipsio.sh1z01d.ru
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
       - MIDTRANS_SERVER_KEY=${MIDTRANS_SERVER_KEY}
       - MIDTRANS_CLIENT_KEY=${MIDTRANS_CLIENT_KEY}
       - MIDTRANS_IS_PRODUCTION=${MIDTRANS_IS_PRODUCTION:-false}

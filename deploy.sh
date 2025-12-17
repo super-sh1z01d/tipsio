@@ -44,6 +44,7 @@ if [ ! -f .env ]; then
     echo "📝 Creating .env file..."
     cat > .env << EOF
 NEXTAUTH_SECRET=$(openssl rand -base64 32)
+OPENROUTER_API_KEY=
 MIDTRANS_SERVER_KEY=
 MIDTRANS_CLIENT_KEY=
 MIDTRANS_IS_PRODUCTION=false
