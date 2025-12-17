@@ -21,6 +21,23 @@ interface OpenRouterChatCompletionResponse {
   };
 }
 
+export interface OpenRouterVisionResult {
+  content: string;
+  rawResponse: string;
+}
+
+export interface OpenRouterTextResult {
+  content: string;
+  rawResponse: string;
+}
+
+export class OpenRouterVisionError extends Error {
+  constructor(message: string, public readonly rawResponse: string) {
+    super(message);
+    this.name = 'OpenRouterVisionError';
+  }
+}
+
 export type OpenRouterImageInput =
   | { url: string }
   | {
@@ -78,7 +95,7 @@ export class OpenRouterClient {
     endpoint: string,
     method: string,
     body: object
-  ): Promise<T> {
+  ): Promise<{ data: T; rawText: string }> {
     const url = `${this.baseUrl}${endpoint}`;
     const headers = {
       'Authorization': `Bearer ${this.apiKey}`,
@@ -120,7 +137,10 @@ export class OpenRouterClient {
       console.log(`OpenRouter Response: ${method} ${url}, Status: ${response.status}, ` +
                   `Response Size: ${responseSize} bytes`);
 
-      return JSON.parse(responseText) as T;
+      return {
+        data: JSON.parse(responseText) as T,
+        rawText: responseText,
+      };
     } catch (error: unknown) {
       clearTimeout(timeout);
       if (error instanceof Error && error.name === 'AbortError') {
@@ -138,7 +158,7 @@ export class OpenRouterClient {
    * @param images An array of image buffers.
    * @returns Raw JSON string content returned by the model.
    */
-  public async extractTextFromImages(images: OpenRouterImageInput[]): Promise<string> {
+  public async extractTextFromImages(images: OpenRouterImageInput[]): Promise<OpenRouterVisionResult> {
     const ocrPrompt = [
       'You are an OCR engine.',
       'Extract ALL visible text from the provided menu image(s).',
@@ -185,13 +205,21 @@ export class OpenRouterClient {
       temperature: 0, // For deterministic OCR
     };
 
-    const response = await this.request<OpenRouterChatCompletionResponse>('/chat/completions', 'POST', body);
+    const { data: response, rawText } = await this.request<OpenRouterChatCompletionResponse>('/chat/completions', 'POST', body);
 
     if (!response || !response.choices || response.choices.length === 0) {
-      throw new Error('OpenRouter vision model returned an empty or invalid response.');
+      console.error('OpenRouter vision response payload was empty:', rawText);
+      throw new OpenRouterVisionError(
+        'OpenRouter vision model returned an empty or invalid response.',
+        rawText
+      );
     }
 
-    return response.choices[0].message.content;
+    const ocrResultContent = response.choices[0].message.content;
+    return {
+      content: typeof ocrResultContent === 'string' ? ocrResultContent : JSON.stringify(ocrResultContent),
+      rawResponse: rawText,
+    };
   }
 
   /**
@@ -199,7 +227,7 @@ export class OpenRouterClient {
    * @param ocrResult The result from the OCR vision model.
    * @returns Raw JSON string content returned by the model.
    */
-  public async structureMenuData(ocrResult: OcrResult): Promise<string> {
+  public async structureMenuData(ocrResult: OcrResult): Promise<OpenRouterTextResult> {
     const extractedText = ocrResult.pages.map(page => page.lines.join('\n')).join('\n\n');
 
     const prompt = `
@@ -272,12 +300,19 @@ export class OpenRouterClient {
       temperature: 0.2, // A bit higher temperature for creativity in translations, but still focused
     };
 
-    const response = await this.request<OpenRouterChatCompletionResponse>('/chat/completions', 'POST', body);
+    const { data: response, rawText } = await this.request<OpenRouterChatCompletionResponse>('/chat/completions', 'POST', body);
 
     if (!response || !response.choices || response.choices.length === 0) {
+      console.error('OpenRouter text response payload was empty:', rawText);
       throw new Error('OpenRouter text LLM returned an empty or invalid response.');
     }
 
-    return response.choices[0].message.content;
+    const structuredMenuContent = response.choices[0].message.content;
+    return {
+      content: typeof structuredMenuContent === 'string'
+        ? structuredMenuContent
+        : JSON.stringify(structuredMenuContent),
+      rawResponse: rawText,
+    };
   }
 }

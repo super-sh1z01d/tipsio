@@ -1,6 +1,10 @@
 // src/lib/menu-ai.ts
 import { z } from 'zod';
-import { OpenRouterClient, type OpenRouterImageInput } from './openrouter';
+import {
+  OpenRouterClient,
+  type OpenRouterImageInput,
+  OpenRouterVisionError,
+} from './openrouter';
 
 // =========================================================
 // Schemas for Vision Model (OCR) Response
@@ -266,23 +270,30 @@ export async function processMenuDigitization(
 
   try {
     // Step 1: OCR - Extract text from images
-    rawOcrResponse = await openRouterClient.extractTextFromImages(images);
-    const ocrParsed = parseModelJson(rawOcrResponse);
+    const { content: ocrContent, rawResponse: rawOcrRaw } =
+      await openRouterClient.extractTextFromImages(images);
+    rawOcrResponse = rawOcrRaw;
+    const ocrParsed = parseModelJson(ocrContent);
     const ocrResult = normalizeOcrResult(ocrParsed);
     OcrResultSchema.parse(ocrResult); // Validate normalized OCR result
 
     // Step 2: Structuring - Convert extracted text into structured menu data
-    rawLlmResponse = await openRouterClient.structureMenuData(ocrResult);
-    const llmParsed = parseModelJson(rawLlmResponse);
+    const { content: llmContent, rawResponse: rawLlmRaw } =
+      await openRouterClient.structureMenuData(ocrResult);
+    rawLlmResponse = rawLlmRaw;
+    const llmParsed = parseModelJson(llmContent);
     const structuredMenu = StructuredMenuSchema.parse(llmParsed); // Validate structured menu data
 
     return { structuredMenu, rawOcrResponse, rawLlmResponse };
   } catch (error: unknown) {
     console.error('Error during menu digitization pipeline:', error);
+    const fallbackOcr =
+      error instanceof OpenRouterVisionError ? error.rawResponse : rawOcrResponse;
+
     throw new MenuDigitizationError(
       `Menu digitization failed: ${error instanceof Error ? error.message : String(error)}`,
       {
-        rawOcrResponse,
+        rawOcrResponse: fallbackOcr,
         rawLlmResponse,
         cause: error,
       }
