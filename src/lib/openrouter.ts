@@ -210,7 +210,7 @@ export class OpenRouterClient {
     if (!response || !response.choices || response.choices.length === 0) {
       console.error('OpenRouter vision response payload was empty:', rawText);
       throw new OpenRouterVisionError(
-        'OpenRouter vision model returned an empty or invalid response.',
+        `OpenRouter vision model returned an empty or invalid response${this.describeOpenRouterError(rawText)}.`,
         rawText
       );
     }
@@ -306,7 +306,9 @@ export class OpenRouterClient {
 
     if (!response || !response.choices || response.choices.length === 0) {
       console.error('OpenRouter text response payload was empty:', rawText);
-      throw new Error('OpenRouter text LLM returned an empty or invalid response.');
+      throw new Error(
+        `OpenRouter text LLM returned an empty or invalid response${this.describeOpenRouterError(rawText)}.`
+      );
     }
 
     const structuredMenuContent = response.choices[0].message.content;
@@ -317,4 +319,21 @@ export class OpenRouterClient {
       rawResponse: rawText,
     };
   }
+
+  private describeOpenRouterError(rawText: string): string {
+    const message = parseOpenRouterError(rawText);
+    return message ? `: ${message}` : '';
+  }
+}
+
+function parseOpenRouterError(rawText: string): string | null {
+  try {
+    const parsed = JSON.parse(rawText);
+    if (parsed?.error?.message) {
+      return parsed.error.message;
+    }
+  } catch {
+    // ignore parse errors
+  }
+  return null;
 }
