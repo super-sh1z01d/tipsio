@@ -104,15 +104,18 @@ rm nginx-init.conf
 echo "🏗️  Building and starting services..."
 docker-compose down || true
 docker-compose build --no-cache
-docker-compose up -d
+docker-compose up -d db
 
 # Wait for database
 echo "⏳ Waiting for database..."
 sleep 10
 
-# Run migrations
+# Run migrations (use dedicated migrator image with full Prisma CLI deps)
 echo "🗄️  Running database migrations..."
-docker-compose exec -T app npx prisma migrate deploy
+docker-compose run --rm migrate
+
+# Start app
+docker-compose up -d app
 
 echo "✅ Deployment complete!"
 echo "🌐 Visit https://tipsio.sh1z01d.ru"

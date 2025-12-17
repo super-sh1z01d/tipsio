@@ -22,6 +22,19 @@ services:
     networks:
       - tipsio-network
 
+  migrate:
+    build:
+      context: .
+      target: migrator
+    restart: "no"
+    environment:
+      - DATABASE_URL=postgresql://tipsio:tipsio_password@db:5432/tipsio
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - tipsio-network
+
   db:
     image: postgres:15-alpine
     restart: always

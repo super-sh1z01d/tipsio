@@ -8,6 +8,19 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm install --legacy-peer-deps
 
+# Prisma migrator image (includes full node_modules so `npx prisma` works)
+FROM base AS migrator
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY package.json package-lock.json* ./
+COPY prisma ./prisma
+COPY prisma.config.ts ./prisma.config.ts
+
+ENV NODE_ENV=production
+
+CMD ["npx", "prisma", "migrate", "deploy"]
+
 # Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /app
