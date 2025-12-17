@@ -123,9 +123,15 @@ model Venue {
   qrCodes   QrCode[]
   tips      Tip[]
   payouts   Payout[]
+  shortCode String? @unique
+
+  menuJobs      MenuDigitizationJob[]
+  menuCategories MenuCategory[]
+  menuItems     MenuItem[]
 
   @@index([managerId])
   @@index([status])
+  @@index([shortCode])
 }
 
 model Staff {
@@ -260,4 +266,84 @@ model WebhookLog {
 
   @@index([provider])
   @@index([processed])
+}
+
+// ==================== SMART MENU MODELS ====================
+
+enum MenuJobStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model MenuDigitizationJob {
+  id           String        @id @default(cuid())
+  status       MenuJobStatus @default(QUEUED)
+  isPublished  Boolean       @default(false)
+  errorMessage String?
+  rawOcrResponse   String?   @db.Text
+  rawLlmResponse   String?   @db.Text
+  imageUrls    String[]
+  publishedAt  DateTime? // New field for published timestamp
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  venueId    String
+  venue      Venue          @relation(fields: [venueId], references: [id])
+  categories MenuCategory[]
+  items      MenuItem[]
+
+  @@index([venueId])
+  @@index([status])
+  @@index([isPublished])
+}
+
+model MenuCategory {
+  id           String   @id @default(cuid())
+  nameEn       String
+  nameOriginal String?
+  nameRu       String?
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  venueId String
+  venue   Venue              @relation(fields: [venueId], references: [id])
+  jobId   String
+  job     MenuDigitizationJob @relation(fields: [jobId], references: [id])
+  items   MenuItem[]
+
+  @@index([venueId])
+  @@index([jobId])
+  @@index([order])
+}
+
+model MenuItem {
+  id             String   @id @default(cuid())
+  originalName   String
+  nameEn         String
+  nameRu         String?
+  descriptionEn  String?
+  descriptionRu  String?
+  priceValue     Int?
+  priceCurrency  String   @default("IDR")
+  isSpicy        Boolean  @default(false)
+  approxCalories Int?
+  isLocalSpecial Boolean  @default(false)
+  order          Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  venueId    String
+  venue      Venue              @relation(fields: [venueId], references: [id])
+  jobId      String
+  job        MenuDigitizationJob @relation(fields: [jobId], references: [id])
+  categoryId String
+  category   MenuCategory       @relation(fields: [categoryId], references: [id])
+
+  @@index([venueId])
+  @@index([jobId])
+  @@index([categoryId])
+  @@index([order])
 }

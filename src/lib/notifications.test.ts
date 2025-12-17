@@ -15,7 +15,6 @@ import {
  * **Validates: Requirements 4.1, 4.2**
  */
 describe('Property 6: No staff notifications', () => {
-  const distributionModeArb = fc.constantFrom<DistributionMode>('POOLED', 'PERSONAL');
   const staffCountArb = fc.nat({ max: 100 });
 
   it('should show no staff alert for PERSONAL mode with 0 staff', () => {

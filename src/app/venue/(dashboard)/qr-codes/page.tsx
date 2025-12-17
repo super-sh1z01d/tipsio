@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -30,37 +31,37 @@ export default function QrCodesPage() {
 
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const dashRes = await fetch("/api/venues/dashboard?period=week");
-        if (!dashRes.ok) throw new Error("Failed to load venue");
-        const dashData = await dashRes.json();
+  const fetchData = useCallback(async () => {
+    try {
+      const dashRes = await fetch("/api/venues/dashboard?period=week");
+      if (!dashRes.ok) throw new Error("Failed to load venue");
+      const dashData = await dashRes.json();
 
-        if (dashData.venue?.id) {
-          setVenueName(dashData.venue.name || "");
+      if (dashData.venue?.id) {
+        setVenueName(dashData.venue.name || "");
 
-          const qrRes = await fetch(`/api/qr?venueId=${dashData.venue.id}`);
-          if (qrRes.ok) {
-            const qrData = await qrRes.json();
-            const codes = qrData.qrCodes || [];
-            const venueCode =
-              codes.find((qr: QrCodeType) => qr.type === "VENUE") ||
-              codes.find((qr: QrCodeType) => qr.type === "TABLE") ||
-              codes[0];
-            setVenueQr(venueCode || null);
-          }
+        const qrRes = await fetch(`/api/qr?venueId=${dashData.venue.id}`);
+        if (qrRes.ok) {
+          const qrData = await qrRes.json();
+          const codes = qrData.qrCodes || [];
+          const venueCode =
+            codes.find((qr: QrCodeType) => qr.type === "VENUE") ||
+            codes.find((qr: QrCodeType) => qr.type === "TABLE") ||
+            codes[0];
+          setVenueQr(venueCode || null);
         }
-      } catch (err) {
-        console.error("Failed to load data:", err);
-        setError(t("failedToLoad"));
-      } finally {
-        setIsPageLoading(false);
       }
+    } catch (err) {
+      console.error("Failed to load data:", err);
+      setError(t("failedToLoad"));
+    } finally {
+      setIsPageLoading(false);
     }
+  }, [t, setVenueQr, setVenueName, setError, setIsPageLoading]); // Add all dependencies
+
+  useEffect(() => {
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchData]);
 
   const handleDownload = async (qrId: string, format: "png" | "svg") => {
     try {
@@ -114,9 +115,11 @@ export default function QrCodesPage() {
             <div className="flex flex-col md:flex-row items-center gap-6">
               {/* QR Preview */}
               <div className="w-32 h-32 md:w-40 md:h-40 bg-white rounded-xl p-3 shadow-sm flex-shrink-0">
-                <img
+                <Image
                   src={`/api/qr/${venueQr.id}/download?format=svg`}
                   alt="QR Code"
+                  width={160} 
+                  height={160}
                   className="w-full h-full"
                 />
               </div>

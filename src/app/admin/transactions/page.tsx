@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { FileText, Search, Filter, X, AlertTriangle, CheckCircle, Clock, XCircle } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { FileText, Search, X, AlertTriangle, CheckCircle, Clock, XCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -27,7 +27,6 @@ interface Transaction {
 export default function AdminTransactionsPage() {
   const t = useTranslations('admin.transactions')
   const [transactions, setTransactions] = useState<Transaction[]>([])
-  const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [midtransFilter, setMidtransFilter] = useState<string>('all')
   const [tipsioFilter, setTipsioFilter] = useState<string>('all')
@@ -98,7 +97,6 @@ export default function AdminTransactionsPage() {
         errorMessage: 'Payment expired after 15 minutes'
       }
     ])
-    setLoading(false)
   }
 
 

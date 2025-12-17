@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -70,11 +70,7 @@ export default function StaffHistoryPage() {
   const t = useTranslations('staff.history');
   const tc = useTranslations('common');
 
-  useEffect(() => {
-    fetchHistory();
-  }, [periodFilter]);
-
-  async function fetchHistory() {
+  const fetchHistory = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch(`/api/staff/history?period=${periodFilter}`);
@@ -90,7 +86,11 @@ export default function StaffHistoryPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [periodFilter, router]); // Add periodFilter and router to useCallback dependencies
+
+  useEffect(() => {
+    fetchHistory();
+  }, [fetchHistory]);
 
   if (loading && !data) {
     return (

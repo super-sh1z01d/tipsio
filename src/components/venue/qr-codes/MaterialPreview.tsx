@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { QrDesignState } from "@/lib/qr-materials";
 
 interface MaterialPreviewProps {
@@ -24,11 +25,13 @@ export const MaterialPreview = ({
       style={bgStyle}
     >
       {showLogo && logoUrl && (
-        <img
+        <Image
           src={logoUrl}
           alt="Logo"
+          width={24 * scale}
+          height={24 * scale}
           className="mb-2 object-contain"
-          style={{ width: 24 * scale, height: 24 * scale }}
+          // style={{ width: 24 * scale, height: 24 * scale }} // sizes are handled by width/height props
         />
       )}
       <h3
@@ -39,10 +42,12 @@ export const MaterialPreview = ({
       </h3>
 
       <div className="bg-white p-2 rounded-md shadow-sm">
-        <img
+        <Image
           src={qrDataUrl}
           alt="QR Code"
-          style={{ width: 80 * scale, height: 80 * scale }}
+          width={80 * scale}
+          height={80 * scale}
+          // style={{ width: 80 * scale, height: 80 * scale }} // sizes are handled by width/height props
         />
       </div>
 

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
-import { validatePasswordMatch, validateStep1, step1Schema } from './validation';
+import { validatePasswordMatch, validateStep1 } from './validation';
 
 /**
  * **Feature: tipsio-refactor-v2, Property 1: Валидация совпадения паролей**

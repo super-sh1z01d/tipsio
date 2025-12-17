@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -63,11 +63,7 @@ export default function StaffDashboardPage() {
   const t = useTranslations('staff.dashboard');
   const tc = useTranslations('common');
 
-  useEffect(() => {
-    fetchDashboard();
-  }, []);
-
-  async function fetchDashboard() {
+  const fetchDashboard = useCallback(async () => {
     try {
       const res = await fetch("/api/staff/dashboard");
       if (res.status === 401) {
@@ -82,7 +78,11 @@ export default function StaffDashboardPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [router]); // router is a stable reference, but for completeness add it.
+
+  useEffect(() => {
+    fetchDashboard();
+  }, [fetchDashboard]);
 
   if (loading) {
     return (

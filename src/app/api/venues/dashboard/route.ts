@@ -54,13 +54,16 @@ export async function GET(request: NextRequest) {
 
       // Calculate date range
       const now = new Date();
-      let startDate = new Date(now);
+      let startDate: Date;
       
       if (period === "today") {
+        startDate = new Date(now);
         startDate.setHours(0, 0, 0, 0);
       } else if (period === "week") {
+        startDate = new Date(now);
         startDate.setDate(startDate.getDate() - 7);
-      } else {
+      } else { // month
+        startDate = new Date(now);
         startDate.setMonth(startDate.getMonth() - 1);
       }
 

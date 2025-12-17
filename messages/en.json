@@ -460,9 +460,26 @@
     "idr": "IDR",
     "prefix": "Rp"
   },
-  "guest": {
-    "tip": {
-      "title": "Say thanks to {name}! 👋",
+      "guest": {
+      "hub": {
+        "viewMenu": "View Menu",
+        "menuNotAvailable": "Menu not available yet",
+        "leaveTip": "Leave a Tip",
+        "poweredBy": "Powered by Tipsio"
+      },
+      "menu": {
+        "disclaimer": "Prices, availability, and calorie values may be approximate. Please confirm with staff.",
+        "calories": "~{value} kcal",
+        "spicy": "Spicy",
+        "localSpecial": "Local Special",
+        "noMenuFound": "No menu found for this venue.",
+        "pageNotFound": "Venue or menu not found.",
+        "language": {
+          "en": "English",
+          "ru": "Русский"
+        }
+      },
+      "tip": {      "title": "Say thanks to {name}! 👋",
       "titleTeam": "Support the team at {venue} ❤️",
       "subtitle": "Loved the service? Send a cashless tip in seconds.",
       "subtitleTeam": "Your digital tip helps us reward the staff who took care of you today.",
@@ -656,8 +673,73 @@
       "distributionRules": "Distribution rules",
       "distributionRulesDesc": "Adjust how tips are shared."
     },
+    "menu": {
+      "title": "Digital Menu",
+      "subtitle": "Create a multilingual menu from a photo in 2 minutes",
+      "empty": {
+        "title": "No menu yet",
+        "desc": "Upload a photo of your menu, and our AI will digitize it, translate it, and create a beautiful page for guests.",
+        "cta": "Create menu"
+      },
+      "status": {
+        "draft": "Draft",
+        "published": "Published",
+        "processing": "Processing",
+        "failed": "Failed"
+      },
+      "stats": {
+        "categories": "Categories",
+        "items": "Items",
+        "lastUpdated": "Last updated"
+      },
+      "actions": {
+        "edit": "Edit menu",
+        "rescan": "Re-scan menu",
+        "viewPublic": "View public page"
+      },
+      "upload": {
+        "title": "Upload Menu Photos",
+        "subtitle": "Take clear photos of your menu pages",
+        "dropzone": "Drag & drop or tap to upload",
+        "hint": "Supports JPG and PNG. Max 5MB per file.",
+        "filesSelected": "{count} files selected",
+        "clearAll": "Clear all",
+        "generate": "Generate Menu",
+        "generating": "AI is reading your menu...",
+        "error": "Upload failed. Please try again.",
+        "validation": {
+          "invalidType": "Unsupported file type: {name}",
+          "tooLarge": "File too large (max 5MB): {name}",
+          "tooMany": "Too many files (max {max})"
+        }
+      },
+      "editor": {
+        "title": "Edit Menu",
+        "subtitle": "Check the AI results and publish",
+        "saveDraft": "Save Draft",
+        "publish": "Publish",
+        "publishing": "Publishing...",
+        "publishedMessage": "Menu published successfully!",
+        "unsavedChanges": "You have unsaved changes",
+        "categories": "Categories",
+        "items": "Items",
+        "addCategory": "Add Category",
+        "addItem": "Add Item",
+        "editItem": "Edit Item",
+        "delete": "Delete",
+        "original": "Original",
+        "english": "English",
+        "russian": "Russian",
+        "price": "Price",
+        "spicy": "Spicy",
+        "calories": "Calories (kcal)",
+        "special": "Local Special",
+        "description": "Description"
+      }
+    },
     "nav": {
       "dashboard": "Dashboard",
+      "menu": "Menu",
       "staff": "Staff",
       "qrCodes": "QR Codes",
       "payouts": "Payouts",

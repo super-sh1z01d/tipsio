@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
@@ -30,15 +30,7 @@ export default function TipSuccessPage() {
   const [loading, setLoading] = useState(true);
   const [tipDetails, setTipDetails] = useState<TipDetails | null>(null);
 
-  useEffect(() => {
-    if (orderId) {
-      fetchTipDetails();
-    } else {
-      setLoading(false);
-    }
-  }, [orderId]);
-
-  async function fetchTipDetails() {
+  const fetchTipDetails = useCallback(async () => {
     try {
       const res = await fetch(`/api/tips/${orderId}`);
       if (res.ok) {
@@ -50,7 +42,15 @@ export default function TipSuccessPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [orderId]);
+
+  useEffect(() => {
+    if (orderId) {
+      fetchTipDetails();
+    } else {
+      setLoading(false);
+    }
+  }, [orderId, fetchTipDetails]);
 
   if (loading) {
     return (

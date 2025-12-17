@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,9 +36,11 @@ function formatCurrency(amount: number): string {
 function StaffAvatar({ staff }: { staff: StaffBalance }) {
   if (staff.avatarUrl) {
     return (
-      <img 
+      <Image 
         src={staff.avatarUrl} 
         alt={staff.displayName}
+        width={40} 
+        height={40}
         className="w-10 h-10 rounded-full object-cover"
       />
     );
@@ -66,11 +69,7 @@ export default function VenuePayoutsPage() {
   const [payingAll, setPayingAll] = useState(false);
   const t = useTranslations('venue.payouts');
 
-  useEffect(() => {
-    fetchStaffBalances();
-  }, []);
-
-  async function fetchStaffBalances() {
+  const fetchStaffBalances = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch("/api/payouts");
@@ -86,7 +85,11 @@ export default function VenuePayoutsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [router]); // Add router to useCallback dependencies
+
+  useEffect(() => {
+    fetchStaffBalances();
+  }, [fetchStaffBalances]);
 
   async function handlePayout(staffId: string) {
     try {

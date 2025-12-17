@@ -8,7 +8,10 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
-    include: ['src/**/*.{test,spec}.{js,ts,tsx}'],
+    include: ['**/*.{test,spec}.{js,ts,tsx}'],
+    env: {
+      DATABASE_URL: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/tipsio_test?schema=public',
+    },
   },
   resolve: {
     alias: {

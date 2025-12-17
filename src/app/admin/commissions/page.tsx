@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -80,11 +79,7 @@ export default function AdminCommissionsPage() {
 
   const availablePeriods = getAvailablePeriods();
 
-  useEffect(() => {
-    fetchCommissions();
-  }, [selectedPeriod]);
-
-  async function fetchCommissions() {
+  const fetchCommissions = useCallback(async () => {
     setLoading(true);
     try {
       const [start, end] = selectedPeriod.split("_");
@@ -103,7 +98,11 @@ export default function AdminCommissionsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [selectedPeriod]); // Add selectedPeriod to useCallback dependencies
+
+  useEffect(() => {
+    fetchCommissions();
+  }, [fetchCommissions]); // Add fetchCommissions to useEffect dependencies
 
   function generateMockData(period: string): CommissionReport {
     const venues: VenueCommission[] = [

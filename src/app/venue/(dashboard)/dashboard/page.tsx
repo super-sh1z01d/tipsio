@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -78,11 +78,7 @@ export default function VenueDashboardPage() {
 
   const isPooledMode = data?.venue?.distributionMode === "POOLED";
 
-  useEffect(() => {
-    fetchDashboard();
-  }, [period]);
-
-  async function fetchDashboard() {
+  const fetchDashboard = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch(`/api/venues/dashboard?period=${period}`);
@@ -98,7 +94,11 @@ export default function VenueDashboardPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [period, router]); // Add period and router to useCallback dependencies
+
+  useEffect(() => {
+    fetchDashboard();
+  }, [fetchDashboard]);
 
   if (loading && !data) {
     return (

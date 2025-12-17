@@ -16,6 +16,7 @@ import {
   LogOut,
   Menu,
   X,
+  UtensilsCrossed,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 
@@ -49,6 +50,7 @@ export default function VenueLayout({ children }: { children: React.ReactNode })
 
   const allNavItems = [
     { href: "/venue/dashboard", label: t('dashboard'), icon: LayoutDashboard, showFor: ["POOLED", "PERSONAL"] },
+    { href: "/venue/menu", label: t('menu'), icon: UtensilsCrossed, showFor: ["POOLED", "PERSONAL"] },
     { href: "/venue/staff", label: t('staff'), icon: Users, showFor: ["PERSONAL"] },
     { href: "/venue/qr-codes", label: t('qrCodes'), icon: QrCode, showFor: ["POOLED", "PERSONAL"] },
     { href: "/venue/payouts", label: t('payouts'), icon: Wallet, showFor: ["PERSONAL"] },

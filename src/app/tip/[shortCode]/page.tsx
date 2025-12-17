@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -69,11 +69,7 @@ export default function TipPage() {
   const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    fetchQrData();
-  }, [shortCode]);
-
-  async function fetchQrData() {
+  const fetchQrData = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch(`/api/tip/${shortCode}`);
@@ -97,7 +93,11 @@ export default function TipPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [shortCode]); // Add shortCode to useCallback dependencies
+
+  useEffect(() => {
+    fetchQrData();
+  }, [fetchQrData]);
 
   const finalAmount =
     selectedAmount || (customAmount ? parseInt(customAmount) : 0);

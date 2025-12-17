@@ -1,6 +1,6 @@
 import React from 'react';
 import { Document, Page, Text, View, Image, StyleSheet, Font } from '@react-pdf/renderer';
-import { QrDesignState, MaterialType } from '@/lib/qr-materials';
+import { QrDesignState } from '@/lib/qr-materials';
 
 // Register generic font with Cyrillic support
 Font.register({

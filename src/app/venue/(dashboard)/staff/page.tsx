@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -60,9 +61,11 @@ type Staff = {
 function StaffAvatar({ staff }: { staff: Staff }) {
   if (staff.avatarUrl) {
     return (
-      <img 
+      <Image 
         src={staff.avatarUrl} 
         alt={staff.displayName}
+        width={48} 
+        height={48}
         className="w-12 h-12 rounded-full object-cover"
       />
     );
@@ -90,76 +93,75 @@ export default function StaffManagementPage() {
   const [isPageLoading, setIsPageLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const t = useTranslations('venue.staff');
-
-  const roleLabels: Record<string, string> = {
-    WAITER: t('roles.waiter'),
-    BARTENDER: t('roles.bartender'),
-    BARISTA: t('roles.barista'),
-    HOSTESS: t('roles.hostess'),
-    CHEF: t('roles.chef'),
-    ADMINISTRATOR: t('roles.administrator'),
-    OTHER: t('roles.other'),
-  };
-
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const form = useForm<StaffForm>({
-    resolver: zodResolver(staffSchema),
-    defaultValues: {
-      displayName: "",
-      fullName: "",
-      role: "WAITER",
-      avatarUrl: "",
-    },
-  });
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Validate file type
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-    if (!allowedTypes.includes(file.type)) {
-      setError("Только JPEG, PNG, WebP или GIF");
-      return;
-    }
-
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setError("Файл слишком большой. Максимум 5MB");
-      return;
-    }
-
-    setAvatarFile(file);
-    setError(null);
-
-    // Create preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setAvatarPreview(e.target?.result as string);
+    const t = useTranslations('venue.staff');
+  
+    const roleLabels: Record<string, string> = {
+      WAITER: t('roles.waiter'),
+      BARTENDER: t('roles.bartender'),
+      BARISTA: t('roles.barista'),
+      HOSTESS: t('roles.hostess'),
+      CHEF: t('roles.chef'),
+      ADMINISTRATOR: t('roles.administrator'),
+      OTHER: t('roles.other'),
     };
-    reader.readAsDataURL(file);
-  };
-
-  const clearAvatar = () => {
-    setAvatarFile(null);
-    setAvatarPreview(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  useEffect(() => {
-    async function fetchData() {
+  
+    const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+    const [avatarFile, setAvatarFile] = useState<File | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+  
+    const form = useForm<StaffForm>({
+      resolver: zodResolver(staffSchema),
+      defaultValues: {
+        displayName: "",
+        fullName: "",
+        role: "WAITER",
+        avatarUrl: "",
+      },
+    });
+  
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+  
+      // Validate file type
+      const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+      if (!allowedTypes.includes(file.type)) {
+        setError("Только JPEG, PNG, WebP или GIF");
+        return;
+      }
+  
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError("Файл слишком большой. Максимум 5MB");
+        return;
+      }
+  
+      setAvatarFile(file);
+      setError(null);
+  
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setAvatarPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    };
+  
+    const clearAvatar = () => {
+      setAvatarFile(null);
+      setAvatarPreview(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    };
+  
+    const fetchData = useCallback(async () => {
       try {
         const dashRes = await fetch("/api/venues/dashboard?period=week");
         if (!dashRes.ok) throw new Error("Failed to load venue");
         const dashData = await dashRes.json();
-
+  
         if (dashData.venue?.id) {
           setVenueId(dashData.venue.id);
           const staffRes = await fetch(
@@ -176,9 +178,11 @@ export default function StaffManagementPage() {
       } finally {
         setIsPageLoading(false);
       }
-    }
-    fetchData();
-  }, []);
+    }, [setVenueId, setStaff, setError, setIsPageLoading]); // Add all dependencies
+  
+    useEffect(() => {
+      fetchData();
+    }, [fetchData]);
 
   const handleAddStaff = async (data: StaffForm) => {
     if (!venueId) {
@@ -373,9 +377,11 @@ export default function StaffManagementPage() {
                 
                 {avatarPreview ? (
                   <div className="relative w-24 h-24 mx-auto">
-                    <img
+                    <Image
                       src={avatarPreview}
                       alt="Preview"
+                      width={96}
+                      height={96}
                       className="w-24 h-24 rounded-full object-cover border-2 border-primary/20"
                     />
                     <button
