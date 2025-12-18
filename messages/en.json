@@ -707,7 +707,7 @@
         "generate": "Generate Menu",
         "generating": "AI is reading your menu...",
         "error": "Upload failed. Please try again.",
-        "fallbackChecking": "Connection dropped, checking processing status..."
+        "fallbackChecking": "Connection dropped, checking processing status...",
         "validation": {
           "invalidType": "Unsupported file type: {name}",
           "tooLarge": "File too large (max 5MB): {name}",
