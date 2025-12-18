@@ -26,9 +26,13 @@ import type { MenuCategoryData, MenuItemData } from "@/types/menu";
 
 type JobStatus = "QUEUED" | "PROCESSING" | "COMPLETED" | "FAILED";
 
-type EditorMenuItem = Omit<MenuItemData, "id"> & { id: string };
-type EditorMenuCategory = Omit<MenuCategoryData, "id" | "items"> & {
+type EditorMenuItem = Omit<MenuItemData, "id" | "nameRu"> & {
   id: string;
+  nameRu: string;
+};
+type EditorMenuCategory = Omit<MenuCategoryData, "id" | "items" | "nameRu"> & {
+  id: string;
+  nameRu: string;
   items: EditorMenuItem[];
 };
 
@@ -112,6 +116,57 @@ function coerceNumberOrNull(value: string): number | null {
   return Math.max(0, Math.trunc(parsed));
 }
 
+function normalizeString(value: string | null | undefined, fallback: string): string {
+  const candidate = (value ?? "").trim();
+  if (candidate.length > 0) {
+    return candidate;
+  }
+  const fallbackTrimmed = fallback.trim();
+  if (fallbackTrimmed.length > 0) {
+    return fallbackTrimmed;
+  }
+  return "Untitled";
+}
+
+function normalizeNullableString(value: string | null | undefined): string | null {
+  const candidate = (value ?? "").trim();
+  return candidate.length > 0 ? candidate : null;
+}
+
+function buildMenuSavePayload(categories: EditorMenuCategory[]) {
+  return categories.map((category, categoryIndex) => {
+    const sanitizedNameEn = normalizeString(
+      category.nameEn,
+      category.nameOriginal ?? category.nameRu ?? `Category ${categoryIndex + 1}`
+    );
+    const sanitizedNameRu = normalizeString(category.nameRu, sanitizedNameEn);
+    return {
+      nameEn: sanitizedNameEn,
+      nameRu: sanitizedNameRu,
+      nameOriginal: normalizeNullableString(category.nameOriginal),
+      order: typeof category.order === "number" ? category.order : categoryIndex,
+      items: category.items.map((item, itemIndex) => {
+        const sanitizedOriginalName = normalizeString(item.originalName, item.nameEn || `Item ${itemIndex + 1}`);
+        const sanitizedNameEn = normalizeString(item.nameEn, sanitizedOriginalName);
+        const sanitizedNameRu = normalizeString(item.nameRu, sanitizedNameEn);
+        return {
+          originalName: sanitizedOriginalName,
+          nameEn: sanitizedNameEn,
+          nameRu: sanitizedNameRu,
+          descriptionEn: normalizeNullableString(item.descriptionEn),
+          descriptionRu: normalizeNullableString(item.descriptionRu),
+          priceValue: item.priceValue ?? null,
+          priceCurrency: item.priceCurrency || "IDR",
+          isSpicy: Boolean(item.isSpicy),
+          approxCalories: item.approxCalories ?? null,
+          isLocalSpecial: Boolean(item.isLocalSpecial),
+          order: typeof item.order === "number" ? item.order : itemIndex,
+        };
+      }),
+    };
+  });
+}
+
 export default function MenuEditorPage() {
   const t = useTranslations("venue.menu.editor");
   const commonT = useTranslations("common");
@@ -182,13 +237,13 @@ export default function MenuEditorPage() {
           id: c.id,
           nameEn: c.nameEn,
           nameOriginal: c.nameOriginal ?? null,
-          nameRu: c.nameRu ?? null,
+          nameRu: c.nameRu ?? c.nameEn,
           order: c.order ?? 0,
           items: (c.items || []).map((i) => ({
             id: i.id,
             originalName: i.originalName,
             nameEn: i.nameEn,
-            nameRu: i.nameRu ?? null,
+            nameRu: i.nameRu ?? i.nameEn,
             descriptionEn: i.descriptionEn ?? null,
             descriptionRu: i.descriptionRu ?? null,
             priceValue: i.priceValue ?? null,
@@ -261,7 +316,7 @@ export default function MenuEditorPage() {
       id: createTempId("cat"),
       nameEn: "New Category",
       nameOriginal: null,
-      nameRu: null,
+      nameRu: "",
       order: categories.length,
       items: [],
     };
@@ -288,7 +343,7 @@ export default function MenuEditorPage() {
       id: createTempId("item"),
       originalName: "New item",
       nameEn: "New item",
-      nameRu: null,
+      nameRu: "",
       descriptionEn: null,
       descriptionRu: null,
       priceValue: null,
@@ -325,10 +380,13 @@ export default function MenuEditorPage() {
     setSaving(true);
     setError(null);
     try {
+      const payload = {
+        categories: buildMenuSavePayload(categories),
+      };
       const response = await fetch("/api/venue/menu", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ categories }),
+        body: JSON.stringify(payload),
       });
 
       if (response.status === 401) {
@@ -547,19 +605,15 @@ export default function MenuEditorPage() {
                   }
                 />
               </div>
-              <div className="space-y-2">
-                <Label>{t("russian")}</Label>
-                <Input
-                  value={selectedCategory.nameRu || ""}
-                  onChange={(e) =>
-                    updateCategoryField(
-                      selectedCategory.id,
-                      "nameRu",
-                      e.target.value.trim() ? e.target.value : null
-                    )
-                  }
-                />
-              </div>
+            <div className="space-y-2">
+              <Label>{t("russian")}</Label>
+              <Input
+                value={selectedCategory.nameRu}
+                onChange={(e) =>
+                  updateCategoryField(selectedCategory.id, "nameRu", e.target.value)
+                }
+              />
+            </div>
             </div>
           </Card>
 
@@ -768,18 +822,13 @@ export default function MenuEditorPage() {
                 <TabsContent value="ru" className="space-y-3 mt-3">
                   <div className="space-y-2">
                     <Label>{t("russian")}</Label>
-                    <Input
-                      value={editingItem.nameRu || ""}
-                      onChange={(e) =>
-                        updateItemField(
-                          selectedCategory.id,
-                          editingItem.id,
-                          "nameRu",
-                          e.target.value.trim() ? e.target.value : null
-                        )
-                      }
-                    />
-                  </div>
+                  <Input
+                    value={editingItem.nameRu}
+                    onChange={(e) =>
+                      updateItemField(selectedCategory.id, editingItem.id, "nameRu", e.target.value)
+                    }
+                  />
+                </div>
                   <div className="space-y-2">
                     <Label>{t("description")}</Label>
                     <textarea

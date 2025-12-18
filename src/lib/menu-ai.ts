@@ -3,6 +3,8 @@ import { z } from 'zod';
 import {
   OpenRouterClient,
   type OpenRouterImageInput,
+  OpenRouterRequestError,
+  OpenRouterTextError,
   OpenRouterVisionError,
 } from './openrouter';
 
@@ -267,6 +269,7 @@ export async function processMenuDigitization(
   const openRouterClient = new OpenRouterClient();
   let rawOcrResponse: string = '';
   let rawLlmResponse: string = '';
+  let currentStage: 'ocr' | 'llm' = 'ocr';
 
   try {
     // Step 1: OCR - Extract text from images
@@ -278,6 +281,7 @@ export async function processMenuDigitization(
     OcrResultSchema.parse(ocrResult); // Validate normalized OCR result
 
     // Step 2: Structuring - Convert extracted text into structured menu data
+    currentStage = 'llm';
     const { content: llmContent, rawResponse: rawLlmRaw } =
       await openRouterClient.structureMenuData(ocrResult);
     rawLlmResponse = rawLlmRaw;
@@ -288,13 +292,24 @@ export async function processMenuDigitization(
   } catch (error: unknown) {
     console.error('Error during menu digitization pipeline:', error);
     const fallbackOcr =
-      error instanceof OpenRouterVisionError ? error.rawResponse : rawOcrResponse;
+      error instanceof OpenRouterVisionError
+        ? error.rawResponse
+        : error instanceof OpenRouterRequestError && currentStage === 'ocr'
+          ? error.rawText
+          : rawOcrResponse;
+
+    const fallbackLlm =
+      error instanceof OpenRouterTextError
+        ? error.rawResponse
+        : error instanceof OpenRouterRequestError && currentStage === 'llm'
+          ? error.rawText
+          : rawLlmResponse;
 
     throw new MenuDigitizationError(
       `Menu digitization failed: ${error instanceof Error ? error.message : String(error)}`,
       {
         rawOcrResponse: fallbackOcr,
-        rawLlmResponse,
+        rawLlmResponse: fallbackLlm,
         cause: error,
       }
     );

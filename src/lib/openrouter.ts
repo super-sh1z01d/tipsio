@@ -38,6 +38,24 @@ export class OpenRouterVisionError extends Error {
   }
 }
 
+export class OpenRouterRequestError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+    public readonly rawText: string
+  ) {
+    super(message);
+    this.name = 'OpenRouterRequestError';
+  }
+}
+
+export class OpenRouterTextError extends Error {
+  constructor(message: string, public readonly rawResponse: string) {
+    super(message);
+    this.name = 'OpenRouterTextError';
+  }
+}
+
 export type OpenRouterImageInput =
   | { url: string }
   | {
@@ -129,7 +147,9 @@ export class OpenRouterClient {
           `OpenRouter Error: ${method} ${url}, Status: ${response.status}, ` +
           `Response Size: ${responseSize} bytes, Error: ${errorText}`
         );
-        throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
+        const describedError = this.describeOpenRouterError(errorText);
+        const message = `OpenRouter API error: ${response.status} - ${errorText}${describedError}`;
+        throw new OpenRouterRequestError(message, response.status, errorText);
       }
 
       const responseText = await response.text();
@@ -306,8 +326,9 @@ export class OpenRouterClient {
 
     if (!response || !response.choices || response.choices.length === 0) {
       console.error('OpenRouter text response payload was empty:', rawText);
-      throw new Error(
-        `OpenRouter text LLM returned an empty or invalid response${this.describeOpenRouterError(rawText)}.`
+      throw new OpenRouterTextError(
+        `OpenRouter text LLM returned an empty or invalid response${this.describeOpenRouterError(rawText)}.`,
+        rawText
       );
     }
 
