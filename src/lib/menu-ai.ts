@@ -6,6 +6,7 @@ import {
   OpenRouterRequestError,
   OpenRouterTextError,
   OpenRouterVisionError,
+  type OpenRouterVisionResult,
 } from './openrouter';
 
 // =========================================================
@@ -275,7 +276,7 @@ export async function processMenuDigitization(
   try {
     // Step 1: OCR - Extract text from images
     const { content: ocrContent, rawResponse: rawOcrRaw } =
-      await openRouterClient.extractTextFromImages(images);
+      await runOcrWithRetry(openRouterClient, images);
     rawOcrResponse = rawOcrRaw;
     const ocrParsed = parseModelJson(ocrContent);
     const ocrResult = normalizeOcrResult(ocrParsed);
@@ -314,6 +315,40 @@ export async function processMenuDigitization(
       }
     );
   }
+}
+
+async function runOcrWithRetry(
+  openRouterClient: OpenRouterClient,
+  images: OpenRouterImageInput[],
+): Promise<OpenRouterVisionResult> {
+  const MAX_ATTEMPTS = 2;
+  let lastError: unknown = null;
+
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    try {
+      return await openRouterClient.extractTextFromImages(images);
+    } catch (error: unknown) {
+      lastError = error;
+      const isRetriable =
+        error instanceof OpenRouterRequestError
+          ? error.status >= 500 || error.status === 429
+          : error instanceof OpenRouterVisionError;
+
+      if (isRetriable && attempt < MAX_ATTEMPTS - 1) {
+        console.warn(
+          `OCR failed (attempt ${attempt + 1}/${MAX_ATTEMPTS}), retrying:`,
+          error instanceof Error ? error.message : String(error)
+        );
+        continue;
+      }
+
+      throw error;
+    }
+  }
+
+  throw lastError instanceof Error
+    ? lastError
+    : new Error('Failed to extract text from images');
 }
 
 async function runStructuredMenuWithRetry(

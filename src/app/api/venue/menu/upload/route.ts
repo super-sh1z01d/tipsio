@@ -12,15 +12,6 @@ import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import { promises as fs } from 'fs';
 
-function isPublicBaseUrl(baseUrl: string) {
-  try {
-    const url = new URL(baseUrl);
-    return !['localhost', '127.0.0.1', '0.0.0.0'].includes(url.hostname);
-  } catch {
-    return false;
-  }
-}
-
 async function getManagerVenueIdOrError() {
   const session = await auth();
 
@@ -62,7 +53,6 @@ export async function POST(req: Request) {
 
   const imageUrls: string[] = [];
   const writtenFilePaths: string[] = [];
-
   // Ensure the upload directory is dynamic and within the public folder
   const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'menu', venueId);
 
@@ -85,8 +75,6 @@ export async function POST(req: Request) {
     // Ensure upload directory exists
     await fs.mkdir(uploadDir, { recursive: true });
 
-    const baseUrl = process.env.NEXTAUTH_URL || new URL(req.url).origin;
-    const useRemoteUrls = isPublicBaseUrl(baseUrl);
     const imageInputs: OpenRouterImageInput[] = [];
 
     for (const file of files) {
@@ -101,11 +89,7 @@ export async function POST(req: Request) {
       await fs.writeFile(filePath, buffer);
       writtenFilePaths.push(filePath);
       imageUrls.push(publicPath);
-      if (useRemoteUrls) {
-        imageInputs.push({ url: new URL(publicPath, baseUrl).toString() });
-      } else {
-        imageInputs.push({ mimeType: file.type, data: buffer });
-      }
+      imageInputs.push({ mimeType: file.type || 'image/jpeg', data: buffer });
     }
 
     // 2. Create MenuDigitizationJob
