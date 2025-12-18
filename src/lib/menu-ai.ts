@@ -270,6 +270,7 @@ export async function processMenuDigitization(
   let rawOcrResponse: string = '';
   let rawLlmResponse: string = '';
   let currentStage: 'ocr' | 'llm' = 'ocr';
+  const llmTracking = { rawResponse: '' };
 
   try {
     // Step 1: OCR - Extract text from images
@@ -282,14 +283,13 @@ export async function processMenuDigitization(
 
     // Step 2: Structuring - Convert extracted text into structured menu data
     currentStage = 'llm';
-    const { content: llmContent, rawResponse: rawLlmRaw } =
-      await openRouterClient.structureMenuData(ocrResult);
-    rawLlmResponse = rawLlmRaw;
-    const llmParsed = parseModelJson(llmContent);
-    const structuredMenu = StructuredMenuSchema.parse(llmParsed); // Validate structured menu data
+    const structuredMenu =
+      await runStructuredMenuWithRetry(openRouterClient, ocrResult, llmTracking);
+    rawLlmResponse = llmTracking.rawResponse;
 
     return { structuredMenu, rawOcrResponse, rawLlmResponse };
   } catch (error: unknown) {
+    rawLlmResponse = rawLlmResponse || llmTracking.rawResponse;
     console.error('Error during menu digitization pipeline:', error);
     const fallbackOcr =
       error instanceof OpenRouterVisionError
@@ -314,4 +314,37 @@ export async function processMenuDigitization(
       }
     );
   }
+}
+
+async function runStructuredMenuWithRetry(
+  openRouterClient: OpenRouterClient,
+  ocrResult: OcrResult,
+  tracking: { rawResponse: string }
+): Promise<StructuredMenu> {
+  const MAX_ATTEMPTS = 2;
+  let lastError: unknown = null;
+
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    const { content, rawResponse } = await openRouterClient.structureMenuData(ocrResult);
+    tracking.rawResponse = rawResponse;
+    try {
+      const parsed = parseModelJson(content);
+      const structuredMenu = StructuredMenuSchema.parse(parsed);
+      return structuredMenu;
+    } catch (error: unknown) {
+      lastError = error;
+      if (attempt < MAX_ATTEMPTS - 1) {
+        console.warn(
+          `Structured menu parse failed (attempt ${attempt + 1}/${MAX_ATTEMPTS}), retrying:`,
+          error instanceof Error ? error.message : String(error)
+        );
+        continue;
+      }
+      throw error;
+    }
+  }
+
+  throw lastError instanceof Error
+    ? lastError
+    : new Error('Failed to parse structured menu response');
 }
