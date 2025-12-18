@@ -21,6 +21,7 @@ export default function MenuUploadPage() {
   const [previews, setPreviews] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [polling, setPolling] = useState(false);
 
   const addFiles = (selectedFiles: File[]) => {
     setError(null);
@@ -72,9 +73,50 @@ export default function MenuUploadPage() {
     setError(null);
   };
 
+  const pollForJobCompletion = async (startedAt: number) => {
+    const deadline = startedAt + 4 * 60 * 1000; // 4 minutes safety window
+
+    while (Date.now() < deadline) {
+      try {
+        const res = await fetch('/api/venue/menu', { cache: 'no-store' });
+        if (!res.ok) {
+          throw new Error('Status check failed');
+        }
+        const data = await res.json();
+        const job = data.job as { status: string; errorMessage?: string | null; createdAt?: string } | null;
+
+        if (!job?.createdAt) {
+          break;
+        }
+
+        const jobCreatedAt = new Date(job.createdAt).getTime();
+        // Ignore older jobs (e.g., previous attempts)
+        if (jobCreatedAt < startedAt - 30_000) {
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+          continue;
+        }
+
+        if (job.status === 'COMPLETED') {
+          return 'completed';
+        }
+        if (job.status === 'FAILED') {
+          setError(job.errorMessage || t('error'));
+          return 'failed';
+        }
+      } catch (pollError) {
+        console.error('Menu status poll failed', pollError);
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+    }
+
+    return null;
+  };
+
   const handleUpload = async () => {
     if (files.length === 0) return;
 
+    const startedAt = Date.now();
     setLoading(true);
     setError(null);
 
@@ -104,6 +146,16 @@ export default function MenuUploadPage() {
     } catch (err: unknown) {
       console.error(err);
       setError(err instanceof Error ? err.message : String(err));
+
+      // In case the request was interrupted (gateway timeout / network hiccup),
+      // try to detect the job completion in the background and auto-redirect.
+      setPolling(true);
+      const pollResult = await pollForJobCompletion(startedAt);
+      setPolling(false);
+
+      if (pollResult === 'completed') {
+        router.push('/venue/menu/editor');
+      }
     } finally {
       setLoading(false);
     }
@@ -149,6 +201,12 @@ export default function MenuUploadPage() {
           <div className="mt-4 p-4 bg-red-500/10 text-red-500 rounded-lg flex items-center gap-2">
             <AlertCircle className="w-5 h-5" />
             <span className="text-sm font-medium">{error}</span>
+          </div>
+        )}
+        {polling && (
+          <div className="mt-4 p-4 bg-amber-500/10 text-amber-600 rounded-lg flex items-center gap-2">
+            <AlertCircle className="w-5 h-5" />
+            <span className="text-sm font-medium">{t('fallbackChecking')}</span>
           </div>
         )}
 
